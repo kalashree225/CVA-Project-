@@ -34,8 +34,13 @@ cd frontend
 npm install
 ```
 
-### 3. Running the Platform (Windows)
-Run the automated dev script from the root directory:
+### 3. Run the Platform
+The easiest way to run the project is using the unified Node.js runner:
+```bash
+node start.js
+```
+
+Or using the Windows PowerShell script:
 ```powershell
 ./run_dev.ps1
 ```
