@@ -1,0 +1,104 @@
+{
+  "dashboard": {
+    "title": "Vision Monitor Overview",
+    "uid": "vision-monitor-overview",
+    "tags": ["vision-monitor"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Inference Requests",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(inference_requests_total[5m])",
+            "legendFormat": "{{model_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Average Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(inference_latency_seconds_sum[5m]) / rate(inference_latency_seconds_count[5m])",
+            "legendFormat": "{{model_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Hallucination Scores",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg(hallucination_score_bucket)",
+            "legendFormat": "{{model_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Active Users",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "active_users"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 4, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Active Organizations",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "active_organizations"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 4, "x": 16, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Alert Events",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(alert_events_total[5m])",
+            "legendFormat": "{{rule_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 20, "y": 8}
+      },
+      {
+        "id": 7,
+        "title": "Database Connections",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "database_connections"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 4, "x": 12, "y": 12}
+      },
+      {
+        "id": 8,
+        "title": "Media Uploads",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(media_uploads_total[5m])",
+            "legendFormat": "{{media_type}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 16, "y": 12}
+      }
+    ]
+  }
+}
