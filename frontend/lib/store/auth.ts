@@ -13,12 +13,6 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>()((set, get) => ({
-<<<<<<< HEAD
-  user: null,
-  token: null,
-  isLoading: false,
-  isAuthenticated: false,
-=======
   user: {
     id: "mock-user-id",
     email: "demo@example.com",
@@ -28,7 +22,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   token: "mock-token",
   isLoading: false,
   isAuthenticated: true,
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 
   login: async (email: string, password: string) => {
     set({ isLoading: true });
@@ -69,24 +62,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
 
   fetchUser: async () => {
-<<<<<<< HEAD
-    const token = get().token;
-    if (!token) {
-      set({ user: null, isAuthenticated: false });
-      return;
-    }
-
-    set({ isLoading: true });
-    try {
-      const user = await authApi.getCurrentUser();
-      set({ user, isAuthenticated: true, isLoading: false });
-    } catch (error) {
-      set({ user: null, token: null, isAuthenticated: false, isLoading: false });
-      throw error;
-    }
-=======
     // BYPASS: Do nothing for demonstration to keep the mock user state
     return;
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
   },
 }));

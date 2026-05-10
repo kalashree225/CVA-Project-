@@ -55,11 +55,7 @@ export function IntelligenceFeed() {
                     <span className="text-sm font-black italic tracking-tight">{event.model_name}</span>
                     <span className={cn(
                       "text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest border",
-<<<<<<< HEAD
                       event.event_type === "metric_update" ? "bg-accent/10 border-accent/20 text-accent" : "bg-primary/10 border-primary/20 text-primary"
-=======
-                      event.event_type === "inference" ? "bg-primary/10 border-primary/20 text-primary" : "bg-accent/10 border-accent/20 text-accent"
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
                     )}>
                       {event.event_type}
                     </span>

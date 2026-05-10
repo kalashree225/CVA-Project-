@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 "use client";
 
 import { useEffect, useState } from "react";
-=======
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 import { 
   BarChart3, 
   TrendingUp, 
@@ -14,10 +11,7 @@ import {
   Globe, 
   Shield, 
   Clock, 
-<<<<<<< HEAD
   DollarSign,
-=======
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
   ChevronRight,
   Filter,
   Download,
@@ -25,10 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-<<<<<<< HEAD
 import { apiClient } from "@/lib/api/client";
-=======
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 
 export default function AnalyticsPage() {
   const [selectedModel, setSelectedModel] = useState("llava-1.5");

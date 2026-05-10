@@ -9,13 +9,8 @@ import { toast } from "sonner";
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoading, isAuthenticated } = useAuthStore();
-<<<<<<< HEAD
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-=======
   const [email, setEmail] = useState("demo@example.com");
   const [password, setPassword] = useState("password");
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 
   // Redirect if already authenticated (Bypassed for demo)
   if (isAuthenticated && typeof window !== "undefined") {
@@ -25,19 +20,9 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-<<<<<<< HEAD
-    try {
-      await login(email, password);
-      toast.success("Login successful!");
-      router.push("/dashboard");
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || "Login failed");
-    }
-=======
     // BYPASS: Always succeed for demonstration
     toast.success("Login successful (Demo Mode)!");
     router.push("/dashboard");
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
   };
 
   return (

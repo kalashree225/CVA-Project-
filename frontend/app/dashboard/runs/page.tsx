@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 "use client";
 
 import { useEffect, useState } from "react";
-=======
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 import { 
   Activity, 
   Search, 
@@ -20,13 +17,9 @@ import {
   DollarSign
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-<<<<<<< HEAD
 import { cn, formatDuration } from "@/lib/utils";
 import { apiClient } from "@/lib/api/client";
 import { InferenceRun } from "@/types";
-=======
-import { cn } from "@/lib/utils";
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 
 export default function RunsPage() {
   const [runs, setRuns] = useState<InferenceRun[]>([]);
@@ -195,23 +188,14 @@ export default function RunsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                        <div className="flex flex-col items-end">
-<<<<<<< HEAD
                           <span className="text-sm font-black italic text-primary tracking-tighter">{formatDuration(run.latency_ms ?? 0)}</span>
-=======
-                          <span className="text-sm font-black italic text-primary tracking-tighter">{formatDuration(run.latency_ms)}</span>
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
                           <span className="text-[9px] font-black uppercase text-muted-foreground mt-1">Oscillation Trace</span>
                        </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                        <div className="flex flex-col items-end">
-<<<<<<< HEAD
                           <span className="text-xs font-bold text-foreground">{(run.token_count_input ?? 0) + (run.token_count_output ?? 0)} TOK</span>
                           <span className="text-[9px] font-black uppercase text-accent mt-1">${(run.cost_usd ?? 0).toFixed(4)} USD</span>
-=======
-                          <span className="text-xs font-bold text-foreground">{run.token_count_input + run.token_count_output} TOK</span>
-                          <span className="text-[9px] font-black uppercase text-accent mt-1">${run.cost_usd.toFixed(4)} USD</span>
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
                        </div>
                     </td>
                     <td className="px-6 py-4 text-center">

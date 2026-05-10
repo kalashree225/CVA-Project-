@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,11 +7,6 @@ import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api/client";
 import { AlertEvent, AlertRule } from "@/types";
 import { toast } from "sonner";
-=======
-import { Shield, ShieldAlert, ShieldCheck, Zap, AlertTriangle, Plus, Filter, Download, ChevronRight, Lock, Eye } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 
 export default function AlertsPage() {
   const [rules, setRules] = useState<AlertRule[]>([]);
@@ -273,11 +267,7 @@ export default function AlertsPage() {
                           <div>
                              <p className="text-xs font-black uppercase tracking-widest text-foreground">Mitigation Triggered: {event.rule_id.slice(0, 8)}</p>
                              <div className="flex items-center gap-2 mt-0.5">
-<<<<<<< HEAD
                                 <span className="text-[9px] font-mono text-muted-foreground italic">Value: {event.value.toFixed(2)}</span>
-=======
-                                <span className="text-[9px] font-mono text-muted-foreground italic">Value: {event.metric_value.toFixed(2)}</span>
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
                                 <span className="h-1 w-1 rounded-full bg-white/20" />
                                 <span className="text-[9px] font-black uppercase text-success tracking-widest">Auto-Resolved</span>
                              </div>
