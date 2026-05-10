@@ -1,10 +1,7 @@
 import uuid
 import random
 import logging
-<<<<<<< HEAD
-=======
 import numpy as np
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 from pinecone import Pinecone, ServerlessSpec
 from app.config import settings
 from typing import Optional, List
@@ -99,9 +96,18 @@ class VectorService:
         run_id: uuid.UUID,
         top_k: int = 5
     ) -> List[dict]:
-        """Query Pinecone for similar runs."""
+        """Query Pinecone for similar runs (Simulated if Pinecone missing)."""
+        if not settings.PINECONE_API_KEY:
+            # Return some mock similar runs
+            return [
+                {"run_id": str(uuid.uuid4()), "score": 0.95, "metadata": {"model_name": "gpt-4-vision", "status": "simulated"}},
+                {"run_id": str(uuid.uuid4()), "score": 0.88, "metadata": {"model_name": "claude-3-opus", "status": "simulated"}},
+                {"run_id": str(uuid.uuid4()), "score": 0.82, "metadata": {"model_name": "gemini-1.5-pro", "status": "simulated"}}
+            ]
+            
         try:
             pc = VectorService.get_pinecone_client()
+            # ... (rest of the original code)
             index = pc.Index(settings.PINECONE_INDEX)
             
             # Generate query embedding (same as upsert for mock)

@@ -74,9 +74,25 @@ class MetricService:
     
     @staticmethod
     async def get_metrics_summary(hours: int = 24) -> dict:
-        """Get metrics summary for last N hours."""
+        """Get metrics summary for last N hours (Simulated if InfluxDB missing)."""
+        if not settings.INFLUXDB_URL:
+            import random
+            return {
+                "avg_latency_per_model": {
+                    "gpt-4-vision": random.randint(1200, 1800),
+                    "claude-3-opus": random.randint(1500, 2200),
+                    "gemini-1.5-pro": random.randint(900, 1400)
+                },
+                "total_token_usage": random.randint(50000, 150000),
+                "total_estimated_cost": round(random.uniform(2.5, 8.5), 2),
+                "avg_hallucination_score": round(random.uniform(0.01, 0.05), 4),
+                "period_hours": hours,
+                "status": "simulated"
+            }
+            
         try:
             client = MetricService.get_influx_client()
+            # ... (rest of the original code)
             query_api = client.query_api()
             
             start = datetime.utcnow() - timedelta(hours=hours)
@@ -172,9 +188,22 @@ class MetricService:
         model: str,
         hours: int = 6
     ) -> list[dict]:
-        """Get time-series data for a metric."""
+        """Get time-series data for a metric (Simulated if InfluxDB missing)."""
+        if not settings.INFLUXDB_URL:
+            import random
+            from datetime import datetime, timedelta
+            data = []
+            now = datetime.utcnow()
+            for i in range(20):
+                data.append({
+                    "timestamp": (now - timedelta(minutes=i*15)).isoformat(),
+                    "value": random.randint(800, 2500) if "latency" in metric else random.uniform(0, 100)
+                })
+            return sorted(data, key=lambda x: x["timestamp"])
+
         try:
             client = MetricService.get_influx_client()
+            # ... (rest of the original code)
             query_api = client.query_api()
             
             start = datetime.utcnow() - timedelta(hours=hours)

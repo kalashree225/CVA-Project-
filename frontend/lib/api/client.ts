@@ -64,11 +64,7 @@ class ApiClient {
     return response.data;
   }
 
-<<<<<<< HEAD
   async postForm(url: string, data: FormData | URLSearchParams) {
-=======
-  async postForm(url: string, data: FormData) {
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
     const response = await this.client.post(url, data, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
