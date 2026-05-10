@@ -15,9 +15,12 @@ console.log('\x1b[36m%s\x1b[0m', '🛡️  Starting Sentinel Intelligence Platfo
 function startProcess(name, command, args, cwd, color) {
     console.log(`${color}[${name}]\x1b[0m Starting...`);
     
+    // On Windows, npm is a .cmd file and needs shell: true
+    const isWin = process.platform === 'win32';
+    
     const proc = spawn(command, args, { 
         cwd, 
-        shell: true,
+        shell: isWin,
         stdio: 'pipe' 
     });
 
