@@ -1,0 +1,94 @@
+{
+  "dashboard": {
+    "title": "Vision Monitor Performance",
+    "uid": "vision-monitor-performance",
+    "tags": ["vision-monitor"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate by Model",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(inference_requests_total[5m])) by (model_name)",
+            "legendFormat": "{{model_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "P95 Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(inference_latency_seconds_bucket[5m]))",
+            "legendFormat": "{{model_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(inference_requests_total{status=\"failed\"}[5m]) / rate(inference_requests_total[5m]) * 100",
+            "legendFormat": "{{model_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Throughput (RPS)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(inference_requests_total[1m]))"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Token Throughput",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(inference_requests_total[5m])) by (input_type)",
+            "legendFormat": "{{input_type}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 18, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Average Token Count",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg(inference_token_count) by (model_name)",
+            "legendFormat": "{{model_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "Cost per Request",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg(inference_cost_usd) by (model_name)",
+            "legendFormat": "{{model_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      }
+    ]
+  }
+}
