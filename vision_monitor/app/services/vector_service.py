@@ -1,6 +1,10 @@
 import uuid
 import random
 import logging
+<<<<<<< HEAD
+=======
+import numpy as np
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 from pinecone import Pinecone, ServerlessSpec
 from app.config import settings
 from typing import Optional, List

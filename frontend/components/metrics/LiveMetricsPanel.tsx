@@ -5,7 +5,11 @@ import { useAuthStore } from "@/lib/store/auth";
 import { useMetricsStore } from "@/lib/store/metricsStore";
 import { useMetricsStream } from "@/lib/hooks/useMetricsStream";
 import { apiClient } from "@/lib/api/client";
+<<<<<<< HEAD
 import { cn, formatNumber, formatDuration, formatCurrency } from "@/lib/utils";
+=======
+import { formatNumber, formatDuration, formatCurrency } from "@/lib/utils";
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Activity, Clock, DollarSign, AlertCircle } from "lucide-react";
@@ -23,7 +27,11 @@ export function LiveMetricsPanel() {
     connectionStatus 
   } = useMetricsStore();
   
+<<<<<<< HEAD
   useMetricsStream(user?.organization_id ?? undefined);
+=======
+  useMetricsStream(user?.organization_id);
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 
   const [fallbackMetrics, setFallbackMetrics] = useState<{
     total_requests: number;

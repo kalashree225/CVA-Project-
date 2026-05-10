@@ -61,6 +61,7 @@ class AuditLogMiddleware(BaseHTTPMiddleware):
             import redis.asyncio as redis
             from app.config import settings
             r = redis.from_url(settings.REDIS_URL, decode_responses=True)
+<<<<<<< HEAD
             try:
                 await r.lpush("audit_logs", json.dumps(audit_entry))
                 # Keep only last 10000 audit logs
@@ -68,6 +69,12 @@ class AuditLogMiddleware(BaseHTTPMiddleware):
                 await r.expire("audit_logs", 7 * 24 * 60 * 60)  # 7 days
             finally:
                 await r.aclose()
+=======
+            await r.lpush("audit_logs", json.dumps(audit_entry))
+            # Keep only last 10000 audit logs
+            await r.ltrim("audit_logs", 0, 9999)
+            await r.expire("audit_logs", 7 * 24 * 60 * 60)  # 7 days
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
         except Exception as e:
             logger.warning(f"Failed to store audit log in Redis: {e}")
         

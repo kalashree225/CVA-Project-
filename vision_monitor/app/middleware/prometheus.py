@@ -70,8 +70,18 @@ def setup_prometheus(app):
         should_ignore_untemplated=True,
         should_group_untemplated=True,
         should_instrument_requests_inprogress=True,
+<<<<<<< HEAD
         excluded_handlers=["/metrics", "/health", "/docs", "/openapi.json", "/api/v1/health"],
         env_var_name="ENABLE_METRICS",
+=======
+        should_instrument_requests_latency=True,
+        should_instrument_requests_exceptions=True,
+        excluded_handlers=["/metrics", "/health", "/docs", "/openapi.json", "/api/v1/health"],
+        env_var_name="ENABLE_METRICS",
+        instrumentations=[],
+        metric_namespace="vision_monitor",
+        metric_subsystem="api"
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
     )
     
     instrumentator.instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)

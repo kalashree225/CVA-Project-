@@ -4,6 +4,14 @@ import random
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 
+<<<<<<< HEAD
+=======
+from app.workflows.engine import workflow_engine
+from app.anomaly.service import anomaly_detection_service
+from app.analytics.service import analytics_service
+from app.services.metrics_service import metrics_service
+
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 logger = logging.getLogger(__name__)
 
 class AutomationService:

@@ -1,5 +1,8 @@
 from fastapi import Request, HTTPException, status
+<<<<<<< HEAD
 from fastapi.responses import JSONResponse
+=======
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 from starlette.middleware.base import BaseHTTPMiddleware
 import redis.asyncio as redis
 from app.config import settings
@@ -21,7 +24,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     
     async def dispatch(self, request: Request, call_next):
         # Skip rate limiting for health endpoint and docs
+<<<<<<< HEAD
         if request.url.path in ["/", "/health", "/metrics", "/docs", "/redoc", "/openapi.json", "/api/v1/health", "/api/v1/health/stream"]:
+=======
+        if request.url.path in ["/health", "/docs", "/openapi.json", "/api/v1/health", "/api/v1/health/stream"]:
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
             return await call_next(request)
         
         api_key = request.headers.get("X-API-Key", "anonymous")
@@ -56,9 +63,15 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 else:
                     retry_after = 60
                 
+<<<<<<< HEAD
                 return JSONResponse(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                     content={"detail": "Rate limit exceeded"},
+=======
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Rate limit exceeded",
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
                     headers={"Retry-After": str(retry_after)}
                 )
             
@@ -70,8 +83,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             # Log warning but don't block requests on Redis failure
             import logging
             logging.warning(f"Rate limiting Redis error: {e}")
+<<<<<<< HEAD
             if self.redis_client is not None:
                 await self.redis_client.aclose()
                 self.redis_client = None
+=======
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
         
         return await call_next(request)

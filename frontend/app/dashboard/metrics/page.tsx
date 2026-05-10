@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 "use client";
 
 import { useEffect, useState } from "react";
+=======
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 import { 
   Zap, 
   Activity, 
@@ -18,8 +21,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+<<<<<<< HEAD
 import { apiClient } from "@/lib/api/client";
 import { AreaChart, BarChart, LineChart } from "@/components/charts";
+=======
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 
 export default function MetricsPage() {
   const [metric, setMetric] = useState("latency_ms");
@@ -128,7 +134,11 @@ export default function MetricsPage() {
          <ControlBox 
             label="Temporal Range" 
             value={hours.toString()} 
+<<<<<<< HEAD
             onChange={(v: string) => setHours(Number(v))}
+=======
+            onChange={(v) => setHours(Number(v))}
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
             options={[
               { value: "1", label: "1 Hour" },
               { value: "6", label: "6 Hours" },

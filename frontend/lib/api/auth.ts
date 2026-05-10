@@ -32,7 +32,11 @@ export const authApi = {
   },
 
   async login(data: LoginRequest): Promise<TokenResponse> {
+<<<<<<< HEAD
     return apiClient.postForm("/api/v1/auth/login", new URLSearchParams({ ...data }));
+=======
+    return apiClient.postForm("/api/v1/auth/login", new URLSearchParams(data));
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
   },
 
   async getCurrentUser(): Promise<User> {

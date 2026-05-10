@@ -13,10 +13,22 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>()((set, get) => ({
+<<<<<<< HEAD
   user: null,
   token: null,
   isLoading: false,
   isAuthenticated: false,
+=======
+  user: {
+    id: "mock-user-id",
+    email: "demo@example.com",
+    full_name: "Demo User",
+    organization_id: "demo-org-id", // Matches the project_id expected by SSE
+  },
+  token: "mock-token",
+  isLoading: false,
+  isAuthenticated: true,
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 
   login: async (email: string, password: string) => {
     set({ isLoading: true });
@@ -57,6 +69,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
 
   fetchUser: async () => {
+<<<<<<< HEAD
     const token = get().token;
     if (!token) {
       set({ user: null, isAuthenticated: false });
@@ -71,5 +84,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       set({ user: null, token: null, isAuthenticated: false, isLoading: false });
       throw error;
     }
+=======
+    // BYPASS: Do nothing for demonstration to keep the mock user state
+    return;
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
   },
 }));

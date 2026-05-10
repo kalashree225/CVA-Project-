@@ -1,6 +1,10 @@
 import uuid
 import logging
+<<<<<<< HEAD
 from fastapi import APIRouter, Depends
+=======
+from fastapi import APIRouter
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 from app.schemas.search import SimilaritySearchRequest, SimilaritySearchResponse, SimilaritySearchResult
 from app.services.vector_service import VectorService
 from app.models.run import InferenceRun

@@ -7,9 +7,15 @@ from app.schemas.health import HealthResponse, ServiceHealth
 from app.config import settings
 from influxdb_client import InfluxDBClient
 from minio import Minio
+<<<<<<< HEAD
 from pinecone import Pinecone
 import httpx
 from sqlalchemy import text
+=======
+from minio.error import S3Error
+from pinecone import Pinecone
+import httpx
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 
 router = APIRouter(prefix="/api/v1/health", tags=["health"])
 logger = logging.getLogger(__name__)
@@ -23,7 +29,11 @@ async def check_postgres() -> str:
     try:
         from app.database import engine
         async with engine.connect() as conn:
+<<<<<<< HEAD
             await conn.execute(text("SELECT 1"))
+=======
+            await conn.execute("SELECT 1")
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
         return "ok"
     except Exception as e:
         logger.warning(f"PostgreSQL health check failed: {e}")
@@ -34,10 +44,14 @@ async def check_redis() -> str:
     """Check Redis health."""
     try:
         r = redis.from_url(settings.REDIS_URL)
+<<<<<<< HEAD
         try:
             await r.ping()
         finally:
             await r.aclose()
+=======
+        await r.ping()
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
         return "ok"
     except Exception as e:
         logger.warning(f"Redis health check failed: {e}")
@@ -70,7 +84,11 @@ async def check_minio() -> str:
         )
         client.list_buckets()
         return "ok"
+<<<<<<< HEAD
     except Exception as e:
+=======
+    except S3Error as e:
+>>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
         logger.warning(f"MinIO health check failed: {e}")
         return "error"
 
