@@ -4,15 +4,15 @@ from typing import List
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str
+    DATABASE_URL: str = "sqlite+aiosqlite:///./test.db"
     
     # Redis
-    REDIS_URL: str
+    REDIS_URL: str = "redis://localhost:6379/0"
     
     # Security
     JWT_SECRET_KEY: str = "change-me-in-production"
     JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRE_MINUTES: int = 60
+    JWT_EXPIRE_MINUTES: int = 1440
     
     # CORS — comma-separated list of allowed origins
     CORS_ORIGINS: str = "http://localhost:3000"
@@ -22,33 +22,33 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
     
     # InfluxDB
-    INFLUXDB_URL: str
-    INFLUXDB_TOKEN: str
-    INFLUXDB_ORG: str
-    INFLUXDB_BUCKET: str
+    INFLUXDB_URL: str = ""
+    INFLUXDB_TOKEN: str = ""
+    INFLUXDB_ORG: str = ""
+    INFLUXDB_BUCKET: str = ""
     
     # MinIO
-    MINIO_ENDPOINT: str
-    MINIO_ACCESS_KEY: str
-    MINIO_SECRET_KEY: str
-    MINIO_BUCKET: str
+    MINIO_ENDPOINT: str = ""
+    MINIO_ACCESS_KEY: str = ""
+    MINIO_SECRET_KEY: str = ""
+    MINIO_BUCKET: str = "sentinel-media"
     
     # Pinecone
-    PINECONE_API_KEY: str
-    PINECONE_INDEX: str
+    PINECONE_API_KEY: str = ""
+    PINECONE_INDEX: str = ""
     PINECONE_DIMENSION: int = 512
     
     # Langfuse
-    LANGFUSE_PUBLIC_KEY: str
-    LANGFUSE_SECRET_KEY: str
-    LANGFUSE_HOST: str
+    LANGFUSE_PUBLIC_KEY: str = ""
+    LANGFUSE_SECRET_KEY: str = ""
+    LANGFUSE_HOST: str = ""
     
     # API Keys
-    VALID_API_KEYS: str = ""
+    VALID_API_KEYS: str = "sentinel-api-key"
     
     # Rate Limiting
-    RATE_LIMIT_INFERENCE: int = 20
-    RATE_LIMIT_DEFAULT: int = 100
+    RATE_LIMIT_INFERENCE: int = 1000
+    RATE_LIMIT_DEFAULT: int = 5000
     
     # Celery
     CELERY_BROKER_URL: str = ""

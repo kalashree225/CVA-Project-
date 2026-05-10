@@ -107,8 +107,8 @@ app.add_middleware(AuditLogMiddleware)
 app.add_middleware(AuthMiddleware)
 app.add_middleware(RateLimitMiddleware)
 
-# Setup Prometheus metrics
-setup_prometheus(app)
+# Setup Prometheus metrics (Disabled for simple setup)
+# setup_prometheus(app)
 
 # Include routers
 app.include_router(inference_router)
