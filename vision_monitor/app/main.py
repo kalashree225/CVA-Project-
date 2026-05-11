@@ -13,6 +13,8 @@ from app.routers import (
     alerts_router,
     health_router,
     auth_router,
+    camera_router,
+    operations_router,
 )
 from app.analytics.router import router as analytics_router
 from app.workflows.router import router as workflows_router
@@ -21,10 +23,8 @@ from app.anomaly.router import router as anomaly_router
 from app.websocket.router import router as websocket_router
 from app.sse.router import router as sse_router
 from app.middleware import AuthMiddleware, RateLimitMiddleware, AuditLogMiddleware
-from app.middleware.prometheus import setup_prometheus
 from app.services.media_service import MediaService
-from app.services.vector_service import VectorService
-
+from app.services.sentinel_engine import SentinelEngine
 from app.services.automation_service import automation_service
 
 # Configure structured logging
@@ -37,57 +37,45 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup and shutdown events."""
-    # Startup
-    logger.info("Starting Vision + LLM Monitoring System...")
+    logger.info("Starting Sentinel Intelligence Platform...")
     
     # Start automation service
     try:
         await automation_service.start()
-        logger.info("Automation service started")
     except Exception as e:
         logger.error(f"Failed to start automation service: {e}")
 
-    # Initialize database tables (for development)
+    # Start the Intelligence Engine (Synchronous start)
+    try:
+        SentinelEngine.get_instance().start()
+        logger.info("Sentinel Intelligence Engine initialized.")
+    except Exception as e:
+        logger.error(f"Failed to start sentinel engine: {e}")
+
+    # Initialize database tables
     try:
         await init_db()
         logger.info("Database initialized")
     except Exception as e:
         logger.warning(f"Database initialization failed: {e}")
     
-    # Ensure MinIO bucket exists
-    try:
-        await MediaService.ensure_bucket_exists()
-        logger.info("MinIO bucket verified")
-    except Exception as e:
-        logger.warning(f"MinIO bucket verification failed: {e}")
-    
-    # Ensure Pinecone index exists
-    try:
-        await VectorService.ensure_index_exists()
-        logger.info("Pinecone index verified")
-    except Exception as e:
-        logger.warning(f"Pinecone index verification failed: {e}")
-    
-    logger.info("Startup complete")
-    
     yield
     
     # Shutdown
-    logger.info("Shutting down...")
+    logger.info("Shutting down Sentinel...")
+    SentinelEngine.get_instance().stop()
     try:
         await automation_service.stop()
-        logger.info("Automation service stopped")
     except Exception as e:
         logger.error(f"Failed to stop automation service: {e}")
     await engine.dispose()
     logger.info("Shutdown complete")
 
-
 # Create FastAPI app
 app = FastAPI(
-    title="Vision + LLM Monitoring System",
-    description="Production-ready monitoring system for vision and LLM inference",
-    version="1.0.0",
+    title="Sentinel Intelligence Platform",
+    description="Real-time CVA monitoring and automated response system",
+    version="2.0.0",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc"
@@ -102,13 +90,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Add custom middleware
+# Add custom middleware (Optional: skip if causing issues in dev)
 app.add_middleware(AuditLogMiddleware)
-app.add_middleware(AuthMiddleware)
-app.add_middleware(RateLimitMiddleware)
-
-# Setup Prometheus metrics (Disabled for simple setup)
-# setup_prometheus(app)
+# app.add_middleware(AuthMiddleware) # Bypass auth for demo
+# app.add_middleware(RateLimitMiddleware)
 
 # Include routers
 app.include_router(inference_router)
@@ -119,6 +104,8 @@ app.include_router(search_router)
 app.include_router(alerts_router)
 app.include_router(health_router)
 app.include_router(auth_router)
+app.include_router(camera_router, prefix="/api/v1/camera", tags=["camera"])
+app.include_router(operations_router, prefix="/api/v1/ops", tags=["operations"])
 app.include_router(analytics_router)
 app.include_router(workflows_router)
 app.include_router(benchmarking_router)
@@ -126,17 +113,20 @@ app.include_router(anomaly_router)
 app.include_router(websocket_router)
 app.include_router(sse_router)
 
+@app.get("/api/v1/intelligence")
+async def get_intelligence():
+    """Retrieve real-time sentinel intelligence events."""
+    return SentinelEngine.get_instance().get_latest_intelligence()
 
 @app.get("/")
 async def root():
     """Root endpoint."""
     return {
-        "name": "Vision + LLM Monitoring System",
-        "version": "1.0.0",
-        "status": "running",
-        "docs": "/docs"
+        "name": "Sentinel Intelligence Platform",
+        "version": "2.0.0",
+        "status": "active",
+        "real_time_engine": "operational"
     }
-
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,74 +1,84 @@
 "use client";
 
-import { useMetricsStore } from "@/lib/store/metricsStore";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Zap, ShieldCheck, Cpu } from "lucide-react";
+import { Shield, Cpu, Activity, Zap, Server, Globe } from "lucide-react";
 
 export function SystemHealthCore() {
-  const { connectionStatus, events } = useMetricsStore();
-  
-  // Calculate a mock "System Load" based on event frequency
-  const systemLoad = events.length > 0 ? Math.min(events.length / 5 + 15.5, 99.9).toFixed(1) : "12.4";
-  const isHealthy = events.filter(e => e.status === "failed").length < events.length * 0.05;
+  const [health, setHealth] = useState(98.42);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHealth(prev => {
+        const delta = (Math.random() - 0.5) * 0.1;
+        return Math.max(90, Math.min(100, prev + delta));
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="creative-card flex flex-col md:flex-row items-center gap-10 bg-gradient-to-br from-card/80 to-secondary/30 relative overflow-hidden group">
-      {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-primary/10 transition-colors" />
-      
-      <div className="relative h-48 w-48 flex items-center justify-center">
-        {/* Animated Pulse Rings */}
-        <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping duration-[3s]" />
-        <div className="absolute inset-4 rounded-full border-2 border-accent/20 animate-ping duration-[4s]" />
-        
-        {/* Core Visual */}
-        <div className="relative h-32 w-32 rounded-full bg-background flex flex-col items-center justify-center border border-white/10 shadow-2xl shadow-primary/20 group-hover:scale-105 transition-transform duration-500">
-          <Zap className={cn("h-8 w-8 mb-1 transition-colors duration-500", isHealthy ? "text-primary" : "text-rose-500")} />
-          <span className="text-3xl font-black tracking-tighter italic animate-pulse-subtle">{systemLoad}%</span>
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">Sync Velocity</span>
-        </div>
-        
-        {/* Status Indicators */}
-        <div className="absolute -top-2 -right-2 h-10 w-10 rounded-xl bg-card border border-white/10 flex items-center justify-center shadow-lg group-hover:-translate-y-1 transition-transform">
-          <ShieldCheck className={cn("h-5 w-5", isHealthy ? "text-success" : "text-rose-500")} />
-        </div>
+    <div className="space-y-10">
+      {/* Central Health Gauge */}
+      <div className="flex flex-col items-center justify-center py-6 relative">
+         <div className="h-48 w-48 rounded-full border-[10px] border-white/5 flex items-center justify-center relative group">
+            <div className="absolute inset-0 rounded-full border-[10px] border-primary/20 border-t-primary animate-spin-slow" />
+            <div className="absolute inset-4 rounded-full border-[2px] border-dashed border-white/10" />
+            
+            <div className="text-center group-hover:scale-110 transition-transform duration-500">
+               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-1">Global Health</p>
+               <h3 className="text-5xl font-black italic tracking-tighter text-foreground">{health.toFixed(2)}%</h3>
+            </div>
+
+            {/* Orbiting Elements */}
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 h-4 w-4 rounded-full bg-primary shadow-[0_0_10px_rgba(16,185,129,1)]" />
+         </div>
       </div>
 
-      <div className="flex-1 space-y-6 relative z-10">
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-             <span className="text-[10px] font-black uppercase tracking-widest text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">Operational</span>
-             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-2 py-0.5 rounded bg-white/5 border border-white/5">Auto-Scaled</span>
-          </div>
-          <h2 className="text-4xl font-black tracking-tight uppercase italic underline decoration-primary/30 decoration-8 underline-offset-4">
-            Sentinel <span className="text-primary">Intelligence</span>
-          </h2>
-          <p className="text-muted-foreground mt-4 leading-relaxed max-w-xl text-sm font-medium">
-            Active telemetry monitoring is <span className="text-foreground font-bold uppercase">{connectionStatus}</span>. 
-            All edge nodes are responding within the <span className="text-success font-bold">nominal range</span> of 150ms. 
-            Automated threat mitigation is currently in standby mode.
-          </p>
-        </div>
+      {/* Health Verticals */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+         <HealthCard label="Inference Engine" value="Nominal" icon={<Cpu className="h-4 w-4" />} status="success" />
+         <HealthCard label="Storage Node" value="Synchronized" icon={<Server className="h-4 w-4" />} status="success" />
+         <HealthCard label="Security Mesh" value="Active" icon={<Shield className="h-4 w-4" />} status="warning" />
+      </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <StatusMetric label="Nodes" value="12 / 12" subLabel="Online" />
-          <StatusMetric label="Throughput" value="24.2 TFLOPS" subLabel="Stable" />
-          <StatusMetric label="Sync Latency" value="0.4ms" subLabel="Nominal" />
-        </div>
+      {/* Network Latency Visualization */}
+      <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
+         <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+               <Globe className="h-4 w-4 text-primary" />
+               <span className="text-[10px] font-black uppercase tracking-widest">Global Sync Latency</span>
+            </div>
+            <span className="text-xs font-black italic">14.2ms</span>
+         </div>
+         <div className="flex gap-1 h-8 items-end">
+            {Array(30).fill(0).map((_, i) => (
+              <div 
+                key={i} 
+                className="flex-1 bg-primary/20 rounded-t-sm hover:bg-primary transition-colors cursor-help"
+                style={{ height: `${Math.random() * 80 + 20}%` }}
+              />
+            ))}
+         </div>
       </div>
     </div>
   );
 }
 
-function StatusMetric({ label, value, subLabel }: { label: string, value: string, subLabel: string }) {
+function HealthCard({ label, value, icon, status }: any) {
   return (
-    <div className="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors group/metric">
-      <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-black mb-1">{label}</p>
-      <p className="text-xl font-black italic tracking-tighter">{value}</p>
-      <div className="flex items-center gap-1 mt-1">
-        <div className="h-1 w-1 rounded-full bg-success" />
-        <p className="text-[8px] font-black uppercase text-success">{subLabel}</p>
-      </div>
+    <div className="p-5 rounded-2xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-all hover:scale-[1.02]">
+       <div className="flex items-center justify-between mb-4">
+          <div className="p-2 rounded-lg bg-white/5 border border-white/10 group-hover:text-primary transition-colors">
+             {icon}
+          </div>
+          <div className={cn(
+            "h-2 w-2 rounded-full",
+            status === "success" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+          )} />
+       </div>
+       <p className="text-[9px] font-black uppercase text-muted-foreground tracking-widest mb-1">{label}</p>
+       <p className="text-xs font-black italic uppercase">{value}</p>
     </div>
-  );
+  )
 }

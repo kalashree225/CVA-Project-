@@ -8,38 +8,48 @@ import {
   BarChart3, 
   Activity, 
   AlertTriangle, 
-  Settings, 
   GitBranch,
   ShieldCheck,
-  LogOut
+  LogOut,
+  Command,
+  Settings,
+  User,
+  Camera
 } from "lucide-react";
 import { useAuthStore } from "@/lib/store/auth";
 
 const NAV_ITEMS = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Inference Runs", href: "/dashboard/runs", icon: Activity },
-  { label: "Metrics", href: "/dashboard/metrics", icon: BarChart3 },
-  { label: "Analytics", href: "/dashboard/analytics", icon: ShieldCheck },
+  { label: "Live Sentinel", href: "/dashboard/camera", icon: Camera },
+  { label: "Packet Stream", href: "/dashboard/runs", icon: Activity },
+  { label: "Deep Analysis", href: "/dashboard/analytics", icon: BarChart3 },
+  { label: "Security", href: "/dashboard/alerts", icon: ShieldCheck },
   { label: "Workflows", href: "/dashboard/workflows", icon: GitBranch },
-  { label: "Alerts", href: "/dashboard/alerts", icon: AlertTriangle },
+  { label: "Metrics", href: "/dashboard/metrics", icon: AlertTriangle },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
 
   return (
-    <aside className="w-64 border-r border-border bg-card flex flex-col h-screen sticky top-0">
-      <div className="p-6">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <Activity className="h-5 w-5 text-primary-foreground" />
+    <aside className="w-64 border-r border-border bg-white flex flex-col h-screen sticky top-0 hidden lg:flex">
+      <div className="p-7 mb-2">
+        <Link href="/dashboard" className="flex items-center gap-2.5 group">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+            <Command className="h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-bold tracking-tight">Vision+</span>
+          <div className="flex flex-col">
+            <span className="text-base font-bold tracking-tight text-foreground">Sentinel</span>
+            <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] -mt-0.5">Intelligence</span>
+          </div>
         </Link>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1">
+      <nav className="flex-1 px-3 space-y-0.5">
+        <div className="px-4 mb-3">
+          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Main Menu</p>
+        </div>
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -47,37 +57,49 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                "flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 group relative",
                 isActive 
-                  ? "bg-primary/10 text-primary" 
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  ? "bg-secondary/50 text-primary" 
+                  : "text-muted-foreground hover:bg-secondary/30 hover:text-foreground"
               )}
             >
-              <item.icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
+              {isActive && (
+                <div className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-primary rounded-r-full" />
+              )}
+              <item.icon className={cn("h-4 w-4 transition-colors", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-border space-y-4">
-        <div className="flex items-center gap-3 px-3">
-          <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold">
-            {user?.full_name?.[0] || user?.email?.[0]}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.full_name || "User"}</p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-          </div>
+      <div className="p-4 mt-auto">
+        <div className="px-4 mb-2">
+          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Control</p>
+        </div>
+        <div className="space-y-0.5">
+          <Link href="/dashboard/settings" className={cn(
+            "flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-semibold transition-all",
+            pathname === "/dashboard/settings" ? "bg-secondary/50 text-primary" : "text-muted-foreground hover:bg-secondary/30 hover:text-foreground"
+          )}>
+            <Settings className="h-4 w-4" />
+            Config
+          </Link>
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 w-full px-4 py-2 rounded-lg text-sm font-semibold text-muted-foreground hover:bg-rose-50 hover:text-rose-600 transition-all duration-200"
+          >
+            <LogOut className="h-4 w-4" />
+            Terminate Session
+          </button>
         </div>
         
-        <button
-          onClick={logout}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
-        >
-          <LogOut className="h-4 w-4" />
-          Sign out
-        </button>
+        <div className="mt-6 pt-6 border-t border-border/50 px-4">
+           <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Hardware Sync: Active</span>
+           </div>
+        </div>
       </div>
     </aside>
   );

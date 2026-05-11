@@ -37,26 +37,26 @@ export default function WorkflowsPage() {
       {/* Automation Logs Section */}
       <section className="space-y-6">
         <div className="flex items-center justify-between">
-           <h2 className="text-2xl font-black tracking-tighter uppercase italic">Automation <span className="text-accent">Audit Log</span></h2>
+           <h2 className="text-2xl font-black tracking-tighter uppercase italic">Automation <span className="text-primary">Audit Log</span></h2>
            <Button variant="ghost" size="sm" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary">
               <Download className="h-3.5 w-3.5 mr-2" /> Export Audit Trail
            </Button>
         </div>
         
-        <div className="creative-card p-0 overflow-hidden border-white/5 bg-black/40">
-           <div className="divide-y divide-white/5">
+        <div className="pro-card p-0 overflow-hidden border-border/40 bg-white/50 backdrop-blur-sm">
+           <div className="divide-y divide-border/40">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors">
-                   <div className="flex items-center gap-4">
-                      <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center">
-                         <Play className="h-3 w-3 text-success fill-current" />
+                <div key={i} className="px-6 py-5 flex items-center justify-between hover:bg-primary/[0.02] transition-colors">
+                   <div className="flex items-center gap-5">
+                      <div className="h-10 w-10 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center">
+                         <Play className="h-4 w-4 text-primary fill-current" />
                       </div>
                       <div>
-                         <p className="text-xs font-black uppercase tracking-widest">Workflow SHM-{1024 + i} Executed</p>
-                         <p className="text-[10px] text-muted-foreground font-mono">Neural Aggregation Protocol // Success // 2.4s</p>
+                         <p className="text-xs font-black uppercase tracking-[0.1em]">Workflow SHM-{1024 + i} Executed</p>
+                         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">Neural Aggregation Protocol // Success // 2.4s</p>
                       </div>
                    </div>
-                   <span className="text-[10px] font-black text-muted-foreground uppercase">{10 - i} minutes ago</span>
+                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-secondary/50 px-2 py-1 rounded border border-border/40">{10 - i} minutes ago</span>
                 </div>
               ))}
            </div>

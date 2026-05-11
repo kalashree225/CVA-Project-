@@ -1,19 +1,18 @@
 import uuid
 import logging
+import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from app.database import get_db
 from app.schemas.media import MediaUploadResponse, MediaLogResponse
 from app.services.media_service import MediaService
-from app.services.vector_service import VectorService
-from app.workers.tasks import process_media_upload_task
 from app.models.run import InferenceRun
 from sqlalchemy import select
 
 router = APIRouter(prefix="/api/v1/media", tags=["media"])
 logger = logging.getLogger(__name__)
-
 
 @router.post("/upload", response_model=MediaUploadResponse)
 async def upload_media(
@@ -22,8 +21,7 @@ async def upload_media(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Upload a media file (image, audio, video, PDF) to MinIO.
-    Returns a presigned URL valid for 1 hour.
+    Upload a media file (image, audio, video, PDF) to local storage.
     """
     # Read file data
     file_data = await file.read()
@@ -37,7 +35,7 @@ async def upload_media(
         if not result.scalar_one_or_none():
             raise HTTPException(status_code=404, detail="Run not found")
     
-    # Upload to MinIO
+    # Save to Local Storage
     media_log = await MediaService.upload_file(
         file_data=file_data,
         filename=file.filename or "upload",
@@ -50,12 +48,8 @@ async def upload_media(
     await db.commit()
     await db.refresh(media_log)
     
-    # Generate presigned URL
+    # Generate serving URL
     presigned_url = MediaService.get_presigned_url(media_log.object_key)
-    
-    # If image, trigger async embedding generation
-    if file.content_type and file.content_type.startswith("image/"):
-        process_media_upload_task.delay(str(media_log.id))
     
     return MediaUploadResponse(
         media_id=media_log.id,
@@ -63,14 +57,13 @@ async def upload_media(
         expires_in=3600
     )
 
-
 @router.get("/{media_id}/url")
 async def get_media_url(
     media_id: uuid.UUID,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Get a fresh presigned URL for a media file.
+    Get a fresh serving URL for a media file.
     """
     media = await MediaService.get_media_by_id(db, media_id)
     if not media:
@@ -79,3 +72,12 @@ async def get_media_url(
     presigned_url = MediaService.get_presigned_url(media.object_key)
     
     return {"media_id": str(media_id), "presigned_url": presigned_url, "expires_in": 3600}
+
+@router.get("/view/{object_key:path}")
+async def view_media(object_key: str):
+    """Serve a local media file from sentinel_storage."""
+    storage_root = MediaService.get_storage_path()
+    file_path = os.path.join(storage_root, object_key)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path)

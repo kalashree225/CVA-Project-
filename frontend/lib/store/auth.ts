@@ -15,9 +15,12 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()((set, get) => ({
   user: {
     id: "mock-user-id",
-    email: "demo@example.com",
-    full_name: "Demo User",
-    organization_id: "demo-org-id", // Matches the project_id expected by SSE
+    email: "admin@sentinel.ai",
+    full_name: "Director of Security Ops",
+    organization_id: "sentinel-global-ops",
+    role: "admin",
+    is_active: true,
+    created_at: new Date().toISOString(),
   },
   token: "mock-token",
   isLoading: false,

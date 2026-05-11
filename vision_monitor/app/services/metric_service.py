@@ -2,8 +2,11 @@ import logging
 from datetime import datetime, timedelta
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
+from sqlalchemy import select, func, and_
 from app.config import settings
-from typing import Optional
+from app.database import SessionLocal
+from app.models.run import InferenceRun
+from typing import Optional, List, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -74,21 +77,52 @@ class MetricService:
     
     @staticmethod
     async def get_metrics_summary(hours: int = 24) -> dict:
-        """Get metrics summary for last N hours (Simulated if InfluxDB missing)."""
+        """Get metrics summary for last N hours (Query database if InfluxDB missing)."""
         if not settings.INFLUXDB_URL:
-            import random
-            return {
-                "avg_latency_per_model": {
-                    "gpt-4-vision": random.randint(1200, 1800),
-                    "claude-3-opus": random.randint(1500, 2200),
-                    "gemini-1.5-pro": random.randint(900, 1400)
-                },
-                "total_token_usage": random.randint(50000, 150000),
-                "total_estimated_cost": round(random.uniform(2.5, 8.5), 2),
-                "avg_hallucination_score": round(random.uniform(0.01, 0.05), 4),
-                "period_hours": hours,
-                "status": "simulated"
-            }
+            try:
+                with SessionLocal() as db:
+                    start_time = datetime.utcnow() - timedelta(hours=hours)
+                    
+                    # Query aggregations
+                    stmt = select(
+                        func.count(InferenceRun.id).label("total_requests"),
+                        func.avg(InferenceRun.latency_ms).label("avg_latency"),
+                        func.sum(InferenceRun.cost_usd).label("total_cost"),
+                        func.avg(InferenceRun.hallucination_score).label("avg_hallucination"),
+                        func.sum(InferenceRun.token_count_input + InferenceRun.token_count_output).label("total_tokens")
+                    ).where(InferenceRun.created_at >= start_time)
+                    
+                    result = db.execute(stmt).first()
+                    
+                    # Query per-model latency
+                    model_stmt = select(
+                        InferenceRun.model_name,
+                        func.avg(InferenceRun.latency_ms)
+                    ).where(InferenceRun.created_at >= start_time).group_by(InferenceRun.model_name)
+                    
+                    model_results = db.execute(model_stmt).all()
+                    avg_latency_per_model = {row[0]: float(row[1]) for row in model_results}
+                    
+                    return {
+                        "avg_latency_per_model": avg_latency_per_model,
+                        "total_token_usage": int(result.total_tokens or 0),
+                        "total_estimated_cost": float(result.total_cost or 0),
+                        "avg_hallucination_score": float(result.avg_hallucination or 0),
+                        "total_requests": int(result.total_requests or 0),
+                        "period_hours": hours,
+                        "status": "persistent"
+                    }
+            except Exception as e:
+                logger.error(f"Database metrics query failed: {e}")
+                return {
+                    "avg_latency_per_model": {},
+                    "total_token_usage": 0,
+                    "total_estimated_cost": 0,
+                    "avg_hallucination_score": 0,
+                    "period_hours": hours,
+                    "status": "error",
+                    "message": str(e)
+                }
             
         try:
             client = MetricService.get_influx_client()
@@ -188,18 +222,43 @@ class MetricService:
         model: str,
         hours: int = 6
     ) -> list[dict]:
-        """Get time-series data for a metric (Simulated if InfluxDB missing)."""
+        """Get time-series data for a metric (Query database if InfluxDB missing)."""
         if not settings.INFLUXDB_URL:
-            import random
-            from datetime import datetime, timedelta
-            data = []
-            now = datetime.utcnow()
-            for i in range(20):
-                data.append({
-                    "timestamp": (now - timedelta(minutes=i*15)).isoformat(),
-                    "value": random.randint(800, 2500) if "latency" in metric else random.uniform(0, 100)
-                })
-            return sorted(data, key=lambda x: x["timestamp"])
+            try:
+                with SessionLocal() as db:
+                    start_time = datetime.utcnow() - timedelta(hours=hours)
+                    
+                    # Map metric names to columns
+                    column_map = {
+                        "latency_ms": InferenceRun.latency_ms,
+                        "token_count_input": InferenceRun.token_count_input,
+                        "token_count_output": InferenceRun.token_count_output,
+                        "cost_usd": InferenceRun.cost_usd,
+                        "hallucination_score": InferenceRun.hallucination_score
+                    }
+                    
+                    target_col = column_map.get(metric, InferenceRun.latency_ms)
+                    
+                    stmt = select(
+                        InferenceRun.created_at,
+                        target_col
+                    ).where(
+                        and_(
+                            InferenceRun.model_name == model,
+                            InferenceRun.created_at >= start_time
+                        )
+                    ).order_by(InferenceRun.created_at.desc()).limit(100)
+                    
+                    results = db.execute(stmt).all()
+                    
+                    data = [
+                        {"timestamp": row[0].isoformat(), "value": float(row[1])}
+                        for row in results
+                    ]
+                    return sorted(data, key=lambda x: x["timestamp"])
+            except Exception as e:
+                logger.error(f"Database timeseries query failed: {e}")
+                return []
 
         try:
             client = MetricService.get_influx_client()

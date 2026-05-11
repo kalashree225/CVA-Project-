@@ -1,58 +1,38 @@
 from pydantic_settings import BaseSettings
 from typing import List
-
+import os
 
 class Settings(BaseSettings):
-    # Database
-    DATABASE_URL: str = "sqlite+aiosqlite:///./test.db"
+    # Database (Defaulting to local SQLite for non-docker deployment)
+    DATABASE_URL: str = "sqlite+aiosqlite:///./sentinel.db"
     
-    # Redis
-    REDIS_URL: str = "redis://localhost:6379/0"
+    # Storage
+    LOCAL_STORAGE_DIR: str = os.path.abspath(os.path.join(os.getcwd(), "sentinel_storage"))
     
     # Security
-    JWT_SECRET_KEY: str = "change-me-in-production"
+    JWT_SECRET_KEY: str = "sentinel-intelligence-secret-key-2026"
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = 1440
     
-    # CORS — comma-separated list of allowed origins
-    CORS_ORIGINS: str = "http://localhost:3000"
+    # CORS
+    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
     
     @property
     def cors_origins_list(self) -> List[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
     
-    # InfluxDB
-    INFLUXDB_URL: str = ""
-    INFLUXDB_TOKEN: str = ""
-    INFLUXDB_ORG: str = ""
-    INFLUXDB_BUCKET: str = ""
+    # Sentinel Core Configuration
+    HARDWARE_CAMERA_INDEX: int = 0
+    SCAN_SENSITIVITY: float = 0.85
+    AUTO_MITIGATION_ENABLED: bool = True
     
-    # MinIO
-    MINIO_ENDPOINT: str = ""
-    MINIO_ACCESS_KEY: str = ""
-    MINIO_SECRET_KEY: str = ""
-    MINIO_BUCKET: str = "sentinel-media"
-    
-    # Pinecone
-    PINECONE_API_KEY: str = ""
-    PINECONE_INDEX: str = ""
-    PINECONE_DIMENSION: int = 512
-    
-    # Langfuse
-    LANGFUSE_PUBLIC_KEY: str = ""
-    LANGFUSE_SECRET_KEY: str = ""
-    LANGFUSE_HOST: str = ""
-    
+    # Celery & Redis
+    REDIS_URL: str = "redis://localhost:6379/0"
+    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
+
     # API Keys
     VALID_API_KEYS: str = "sentinel-api-key"
-    
-    # Rate Limiting
-    RATE_LIMIT_INFERENCE: int = 1000
-    RATE_LIMIT_DEFAULT: int = 5000
-    
-    # Celery
-    CELERY_BROKER_URL: str = ""
-    CELERY_RESULT_BACKEND: str = ""
     
     @property
     def valid_api_keys_list(self) -> List[str]:
@@ -62,9 +42,8 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
 
-
 settings = Settings()
 
-# Set Celery URLs from Redis URL
-settings.CELERY_BROKER_URL = settings.REDIS_URL
-settings.CELERY_RESULT_BACKEND = settings.REDIS_URL
+# Ensure storage directory exists on startup
+if not os.path.exists(settings.LOCAL_STORAGE_DIR):
+    os.makedirs(settings.LOCAL_STORAGE_DIR)

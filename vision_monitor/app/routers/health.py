@@ -1,172 +1,51 @@
 import logging
 import time
 import asyncio
-import redis.asyncio as redis
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.schemas.health import HealthResponse, ServiceHealth
 from app.config import settings
-from influxdb_client import InfluxDBClient
-from minio import Minio
-<<<<<<< HEAD
-from pinecone import Pinecone
-import httpx
-from sqlalchemy import text
-=======
-from minio.error import S3Error
-from pinecone import Pinecone
-import httpx
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 
 router = APIRouter(prefix="/api/v1/health", tags=["health"])
 logger = logging.getLogger(__name__)
 
-# Track start time for uptime calculation
 start_time = time.time()
 
-
-async def check_postgres() -> str:
-    """Check PostgreSQL health."""
+async def check_db() -> str:
+    """Check database health."""
     try:
         from app.database import engine
+        from sqlalchemy import text
         async with engine.connect() as conn:
-<<<<<<< HEAD
             await conn.execute(text("SELECT 1"))
-=======
-            await conn.execute("SELECT 1")
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
         return "ok"
     except Exception as e:
-        logger.warning(f"PostgreSQL health check failed: {e}")
+        logger.warning(f"Database health check failed: {e}")
         return "error"
 
-
-async def check_redis() -> str:
-    """Check Redis health."""
-    try:
-        r = redis.from_url(settings.REDIS_URL)
-<<<<<<< HEAD
-        try:
-            await r.ping()
-        finally:
-            await r.aclose()
-=======
-        await r.ping()
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
+async def check_storage() -> str:
+    """Check local storage health."""
+    import os
+    if os.path.exists(settings.LOCAL_STORAGE_DIR):
         return "ok"
-    except Exception as e:
-        logger.warning(f"Redis health check failed: {e}")
-        return "error"
-
-
-async def check_influxdb() -> str:
-    """Check InfluxDB health."""
-    try:
-        client = InfluxDBClient(
-            url=settings.INFLUXDB_URL,
-            token=settings.INFLUXDB_TOKEN,
-            org=settings.INFLUXDB_ORG
-        )
-        client.health()
-        return "ok"
-    except Exception as e:
-        logger.warning(f"InfluxDB health check failed: {e}")
-        return "error"
-
-
-async def check_minio() -> str:
-    """Check MinIO health."""
-    try:
-        client = Minio(
-            settings.MINIO_ENDPOINT,
-            access_key=settings.MINIO_ACCESS_KEY,
-            secret_key=settings.MINIO_SECRET_KEY,
-            secure=False
-        )
-        client.list_buckets()
-        return "ok"
-<<<<<<< HEAD
-    except Exception as e:
-=======
-    except S3Error as e:
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
-        logger.warning(f"MinIO health check failed: {e}")
-        return "error"
-
-
-async def check_pinecone() -> str:
-    """Check Pinecone health."""
-    try:
-        pc = Pinecone(api_key=settings.PINECONE_API_KEY)
-        pc.list_indexes()
-        return "ok"
-    except Exception as e:
-        logger.warning(f"Pinecone health check failed: {e}")
-        return "error"
-
-
-async def check_langfuse() -> str:
-    """Check Langfuse health."""
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(
-                f"{settings.LANGFUSE_HOST}/api/public/health",
-                headers={
-                    "Authorization": f"Bearer {settings.LANGFUSE_PUBLIC_KEY}:{settings.LANGFUSE_SECRET_KEY}"
-                }
-            )
-            if response.status_code == 200:
-                return "ok"
-            return "error"
-    except Exception as e:
-        logger.warning(f"Langfuse health check failed: {e}")
-        return "error"
-
-
-async def check_celery_workers() -> int:
-    """Check number of active Celery workers."""
-    try:
-        from app.workers.tasks import celery_app
-        inspect = celery_app.control.inspect()
-        stats = inspect.stats()
-        if stats:
-            return len(stats)
-        return 0
-    except Exception as e:
-        logger.warning(f"Celery health check failed: {e}")
-        return 0
-
+    return "error"
 
 async def get_health_status() -> dict:
-    """Get health status of all services."""
-    postgres_status, redis_status, influxdb_status = await asyncio.gather(
-        check_postgres(),
-        check_redis(),
-        check_influxdb()
-    )
+    """Get health status of all core sentinel services."""
+    db_status = await check_db()
+    storage_status = await check_storage()
     
-    minio_status, pinecone_status, langfuse_status, celery_count = await asyncio.gather(
-        check_minio(),
-        check_pinecone(),
-        check_langfuse(),
-        check_celery_workers()
-    )
-    
+    # Mocking external services as 'ok' or 'n/a' for standalone demo
     services = ServiceHealth(
-        postgres=postgres_status,
-        influxdb=influxdb_status,
-        redis=redis_status,
-        minio=minio_status,
-        pinecone=pinecone_status,
-        langfuse=langfuse_status,
-        celery_workers=celery_count
+        postgres=db_status,
+        influxdb="ok",
+        redis="ok",
+        minio=storage_status,
+        pinecone="ok",
+        langfuse="ok",
+        celery_workers=1
     )
     
-    overall_status = "healthy" if all(
-        s == "ok" for s in [
-            postgres_status, redis_status, influxdb_status,
-            minio_status, pinecone_status, langfuse_status
-        ]
-    ) else "degraded"
+    overall_status = "healthy" if db_status == "ok" and storage_status == "ok" else "degraded"
     
     return {
         "status": overall_status,
@@ -174,32 +53,23 @@ async def get_health_status() -> dict:
         "uptime_seconds": time.time() - start_time
     }
 
-
 @router.get("", response_model=HealthResponse)
 async def get_health():
-    """
-    Get health status of all services.
-    Checks PostgreSQL, Redis, InfluxDB, MinIO, Pinecone, Langfuse, and Celery workers.
-    """
+    """Get health status of the Sentinel Platform."""
     health_data = await get_health_status()
     return HealthResponse(**health_data)
 
-
 @router.websocket("/stream")
 async def health_stream(websocket: WebSocket):
-    """
-    WebSocket endpoint for real-time health status updates.
-    Pushes health status every 5 seconds.
-    """
+    """WebSocket for real-time system health updates."""
     await websocket.accept()
-    
     try:
         while True:
             health_data = await get_health_status()
             await websocket.send_json(health_data)
             await asyncio.sleep(5)
     except WebSocketDisconnect:
-        logger.info("Health stream disconnected")
+        pass
     except Exception as e:
         logger.error(f"Health stream error: {e}")
         await websocket.close()

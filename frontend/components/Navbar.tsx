@@ -1,102 +1,81 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { 
-  LayoutDashboard, 
-  BarChart3, 
-  Activity, 
-  AlertTriangle, 
-  Settings, 
-  GitBranch,
-  ShieldCheck,
   User,
-  Bell
+  Bell,
+  Search,
+  ChevronRight,
+  Shield,
+  Activity,
+  Cpu
 } from "lucide-react";
 import { useAuthStore } from "@/lib/store/auth";
-
-const NAV_ITEMS = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Deep Analysis", href: "/dashboard/analytics", icon: BarChart3 },
-  { label: "Packet Stream", href: "/dashboard/runs", icon: Activity },
-  { label: "Telemetry", href: "/dashboard/metrics", icon: Settings }, // Settings is a bit weird for telemetry, let's use Activity if it wasn't used
-  { label: "Pipeline", href: "/dashboard/workflows", icon: GitBranch },
-  { label: "Security", href: "/dashboard/alerts", icon: ShieldCheck },
-];
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
+
+  const getBreadcrumb = () => {
+    const parts = pathname.split("/").filter(Boolean);
+    if (parts.length === 0) return "Global Overview";
+    return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" / ");
+  };
 
   return (
-    <nav className="nav-blur sticky top-0 z-50 border-b border-white/5">
-      <div className="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-12">
-          <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary via-primary/80 to-accent flex items-center justify-center shadow-2xl shadow-primary/40 group-hover:scale-110 transition-all duration-500 border border-white/10">
-              <ShieldCheck className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tighter uppercase leading-none italic">
-                Sentinel<span className="animate-gradient-text">Ops</span>
-              </span>
-              <span className="text-[8px] font-black uppercase tracking-[0.4em] text-muted-foreground mt-1">Intelligence Layer</span>
-            </div>
-          </Link>
-
-          <div className="hidden xl:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "relative px-5 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 group",
-                    isActive 
-                      ? "text-primary bg-primary/10 shadow-[inset_0_0_12px_rgba(var(--primary-rgb),0.1)]" 
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-                  )}
-                >
-                  <item.icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isActive ? "text-primary" : "text-muted-foreground")} />
-                  {item.label}
-                  {isActive && (
-                    <span className="absolute -bottom-[21px] left-0 w-full h-[3px] bg-primary rounded-t-full shadow-[0_0_20px_rgba(var(--primary-rgb),0.8)]" />
-                  )}
-                </Link>
-              );
-            })}
+    <nav className="nav-blur sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-b border-border/40">
+      <div className="mx-auto px-8 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/30 border border-border/50">
+             <Shield className="h-3.5 w-3.5 text-primary" />
+             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{getBreadcrumb()}</span>
+          </div>
+          
+          <div className="hidden lg:flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
+             <div className="flex items-center gap-1.5">
+                <Cpu className="h-3 w-3" />
+                <span>Sentinel Core v1.0</span>
+             </div>
+             <div className="h-3 w-[1px] bg-border" />
+             <div className="flex items-center gap-1.5">
+                <Activity className="h-3 w-3 text-emerald-500" />
+                <span className="text-emerald-600/60">Node Sync: 99.9%</span>
+             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-             <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-             <span className="text-[9px] font-black uppercase tracking-widest text-success">Cluster Nominal</span>
+          <div className="relative hidden xl:block group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Search Intelligence..." 
+              className="h-9 w-72 bg-secondary/20 border border-border/50 rounded-full pl-10 pr-4 text-xs focus:outline-none focus:ring-2 focus:ring-primary/5 focus:border-primary/30 transition-all placeholder:text-muted-foreground/40 font-medium"
+            />
           </div>
 
-          <button className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/5 text-muted-foreground hover:text-primary transition-all border border-white/5 hover:border-primary/20">
-            <Bell className="h-5 w-5" />
-          </button>
-          
-          <div className="h-8 w-[1px] bg-white/10 mx-1" />
-
-          <div className="flex items-center gap-4 pl-2">
-            <div className="flex flex-col items-end hidden lg:flex">
-              <span className="text-sm font-black italic tracking-tight text-foreground leading-tight">
-                {user?.full_name || "Enterprise User"}
-              </span>
-              <span className="text-[9px] uppercase tracking-widest text-primary font-black opacity-80">
-                System Administrator
-              </span>
-            </div>
-            <button
-              className="h-11 w-11 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-xs font-black shadow-lg ring-1 ring-white/5 hover:ring-primary/40 transition-all group overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <User className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors z-10" />
+          <div className="flex items-center gap-4">
+            <button className="relative h-9 w-9 flex items-center justify-center rounded-full bg-secondary/30 border border-border/50 text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all">
+              <Bell className="h-4 w-4" />
+              <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-primary border border-white" />
             </button>
+            
+            <div className="flex items-center gap-2 pl-2 group cursor-pointer">
+               <div className="flex flex-col items-end">
+                  <span className="text-[11px] font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
+                    {user?.full_name || "Enterprise User"}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-tighter opacity-60">
+                    System Admin
+                  </span>
+               </div>
+               <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-primary/60 p-[1px] transition-transform group-hover:scale-105">
+                  <div className="h-full w-full rounded-full bg-white flex items-center justify-center text-[11px] font-black text-primary">
+                    {user?.full_name?.[0] || "U"}
+                  </div>
+               </div>
+            </div>
           </div>
         </div>
       </div>

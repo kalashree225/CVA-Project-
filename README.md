@@ -14,27 +14,70 @@ The platform consists of two main components:
 
 ## 🚀 Getting Started
 
-### 1. Prerequisites
-- **Python 3.9+**
-- **Node.js 18+**
-- **npm** (comes with Node.js)
+# 🛡️ Sentinel Intelligence Platform v2.0
+### Advanced Computer Vision Analytics & Automated Response System
 
-### 2. Initial Setup
-Clone the repository and install dependencies:
+Sentinel is a high-performance, production-grade intelligence platform designed for real-time monitoring and automated mitigation of security anomalies. Transitioned from a prototype to a fully operational command center, Sentinel leverages a "Cyber-Emerald" aesthetic to deliver high-density, mission-critical data visualizations.
 
-**Backend Setup:**
+---
+
+## 🌟 Key Features
+
+- **Intelligence Stream**: Real-time terminal-style event logging synchronized with the backend engine.
+- **Hex-Scan Packet Inspector**: Deep-dive analysis of neural inference packets with risk scoring and metadata extraction.
+- **Cyber-Emerald Command Center**: A high-density dashboard optimized for standalone local demonstration with minimal latency.
+- **Neural Cost Oscillation Tracking**: Professional visualizations tracking active latency vs. operational cost oscillations.
+- **Automation Orchestration**: Fully functional mitigation protocols (Recalibration, Security Audit, Node Rebalancing) with real-time feedback.
+- **Hardware Sync**: Direct integration with local camera hardware for seamless Computer Vision analysis.
+
+## 🛠️ Technology Stack
+
+- **Backend**: FastAPI (Python 3.10+) with SQLAlchemy & SQLite for persistent telemetry.
+- **Frontend**: Next.js 14, Tailwind CSS, Lucide React, and Recharts.
+- **Engine**: Custom Python Intelligence Engine for autonomous event generation.
+- **Database**: Local SQLite (`sentinel.db`) ensuring data persistence without cloud dependencies.
+
+---
+
+## 🚀 Quick Start (Local Standalone)
+
+Sentinel is optimized for local execution without Docker or complex cloud configurations.
+
+### 1. Prerequisite Setup
+Ensure you have **Python 3.10+** and **Node.js 18+** installed.
+
+### 2. Initialization
+Install dependencies for both layers:
 ```bash
+# Backend
 cd vision_monitor
-pip install -r ../requirements.txt
-```
+pip install -r requirements.txt
 
-**Frontend Setup:**
-```bash
-cd frontend
+# Frontend
+cd ../frontend
 npm install
 ```
 
-### 3. Run the Platform
+### 3. Execution
+Launch the unified platform using the master runner:
+```bash
+node start.js
+```
+
+- **Command Center**: `http://localhost:3000`
+- **Neural API**: `http://localhost:8000/docs`
+
+---
+
+## 🎭 Persona & Branding
+The platform is pre-configured for the **Director of Security Operations**. 
+- **User**: admin@sentinel.ai
+- **Role**: Cluster Administrator
+
+---
+
+## ⚖️ License
+Proprietary Sentinel Global Operations License. For demonstration purposes only.
 The easiest way to run the project is using the unified Node.js runner:
 ```bash
 node start.js

@@ -1,23 +1,29 @@
 /**
- * Sentinel Intelligence Platform - Unified Runner
+ * Sentinel Intelligence Platform - Unified Runner (Non-Docker Version)
  * This script starts both the Backend (FastAPI) and Frontend (Next.js) concurrently.
  */
 
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 // Configuration
 const backendDir = path.join(__dirname, 'vision_monitor');
 const frontendDir = path.join(__dirname, 'frontend');
+const storageDir = path.join(__dirname, 'vision_monitor', 'sentinel_storage');
 
-console.log('\x1b[36m%s\x1b[0m', '🛡️  Starting Sentinel Intelligence Platform...');
+console.log('\x1b[36m%s\x1b[0m', '🛡️  Initializing Sentinel Intelligence Platform (Standalone)...');
+
+// Ensure local storage directory exists
+if (!fs.existsSync(storageDir)) {
+    console.log('\x1b[90m%s\x1b[0m', `   - Creating storage volume: ${storageDir}`);
+    fs.mkdirSync(storageDir, { recursive: true });
+}
 
 function startProcess(name, command, args, cwd, color) {
     console.log(`${color}[${name}]\x1b[0m Starting...`);
     
-    // On Windows, npm is a .cmd file and needs shell: true
     const isWin = process.platform === 'win32';
-    
     const proc = spawn(command, args, { 
         cwd, 
         shell: isWin,
@@ -33,19 +39,20 @@ function startProcess(name, command, args, cwd, color) {
     });
 
     proc.on('close', (code) => {
-        console.log(`${color}[${name}]\x1b[0m Exited with code ${code}`);
-        // Kill the entire process if one of the services dies
-        process.exit(code);
+        if (code !== 0 && code !== null) {
+            console.log(`${color}[${name}]\x1b[0m Exited with code ${code}`);
+            process.exit(code);
+        }
     });
 
     return proc;
 }
 
-// 1. Start Backend
+// 1. Start Backend (Using the local sentinel_storage)
 const backend = startProcess(
     'Backend', 
     'python', 
-    ['-m', 'uvicorn', 'app.main:app', '--host', '0.0.0.0', '--port', '8000', '--reload'], 
+    ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8000', '--reload'], 
     backendDir,
     '\x1b[32m' // Green
 );
@@ -61,12 +68,12 @@ const frontend = startProcess(
 
 // Handle process termination
 process.on('SIGINT', () => {
-    console.log('\n\x1b[33m%s\x1b[0m', '🛑 Shutting down services...');
+    console.log('\n\x1b[33m%s\x1b[0m', '🛑 Terminating Sentinel Session...');
     backend.kill();
     frontend.kill();
     process.exit();
 });
 
-console.log('\n\x1b[36m%s\x1b[0m', '✅ Services are initializing...');
-console.log('\x1b[90m%s\x1b[0m', `   - Backend: http://localhost:8000/docs`);
-console.log('\x1b[90m%s\x1b[0m', `   - Frontend: http://localhost:3000\n`);
+console.log('\n\x1b[36m%s\x1b[0m', '✅ Sentinel Core Initialized.');
+console.log('\x1b[90m%s\x1b[0m', `   - Command Center: http://localhost:3000`);
+console.log('\x1b[90m%s\x1b[0m', `   - Neural API: http://localhost:8000/docs\n`);

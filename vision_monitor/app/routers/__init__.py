@@ -6,6 +6,8 @@ from app.routers.search import router as search_router
 from app.routers.alerts import router as alerts_router
 from app.routers.health import router as health_router
 from app.routers.auth import router as auth_router
+from app.routers.camera import router as camera_router
+from app.routers.operations import router as operations_router
 
 __all__ = [
     "inference_router",
@@ -16,4 +18,6 @@ __all__ = [
     "alerts_router",
     "health_router",
     "auth_router",
+    "camera_router",
+    "operations_router",
 ]

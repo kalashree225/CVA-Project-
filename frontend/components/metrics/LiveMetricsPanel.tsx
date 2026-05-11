@@ -6,21 +6,15 @@ import { useMetricsStore } from "@/lib/store/metricsStore";
 import { useMetricsStream } from "@/lib/hooks/useMetricsStream";
 import { apiClient } from "@/lib/api/client";
 import { cn, formatNumber, formatDuration, formatCurrency } from "@/lib/utils";
-import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Activity, Clock, DollarSign, AlertCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/Card";
+import { Activity, Clock, DollarSign, AlertCircle, ArrowUpRight, ArrowDownRight } from "lucide-react";
 
-/**
- * Enterprise-grade Live Metrics Panel.
- * Uses custom UI components and a high-precision design language.
- */
 export function LiveMetricsPanel() {
   const user = useAuthStore((state) => state.user);
   const { 
     events, 
     averageLatencyMs, 
     totalCostUsd,
-    connectionStatus 
   } = useMetricsStore();
   
   useMetricsStream(user?.organization_id ?? undefined);
@@ -52,36 +46,40 @@ export function LiveMetricsPanel() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <MetricCard
-        title="Active Throughput"
+        title="Throughput"
         value={formatNumber(totalRequests)}
-        icon={<Activity className="h-5 w-5 text-primary" />}
-        description="Packets processed / session"
+        icon={<Activity className="h-4 w-4" />}
+        description="Packets processed"
         trend="+12.5%"
         trendUp={true}
+        color="blue"
       />
       <MetricCard
-        title="Global Latency"
+        title="Latency"
         value={formatDuration(avgLatency)}
-        icon={<Clock className="h-5 w-5 text-success" />}
-        description="Edge response oscillation"
+        icon={<Clock className="h-4 w-4" />}
+        description="Avg response time"
         trend="-4.2ms"
-        trendUp={true} // Lower latency is good
+        trendUp={true}
+        color="emerald"
       />
       <MetricCard
-        title="Compute Cost"
+        title="Computed Cost"
         value={formatCurrency(totalCost)}
-        icon={<DollarSign className="h-5 w-5 text-accent" />}
-        description="Session burn rate"
+        icon={<DollarSign className="h-4 w-4" />}
+        description="Session burn"
         trend="$0.12/hr"
         trendUp={false}
+        color="violet"
       />
       <MetricCard
-        title="Intelligence Delta"
+        title="Risk Score"
         value={liveHallucinationScore.toFixed(3)}
-        icon={<AlertCircle className="h-5 w-5 text-amber-500" />}
-        description="Anomaly confidence score"
+        icon={<AlertCircle className="h-4 w-4" />}
+        description="Anomaly confidence"
         trend="Nominal"
         trendUp={true}
+        color="amber"
       />
     </div>
   );
@@ -94,37 +92,43 @@ interface MetricCardProps {
   description: string;
   trend: string;
   trendUp: boolean;
+  color: "blue" | "emerald" | "violet" | "amber";
 }
 
-function MetricCard({ title, value, icon, description, trend, trendUp }: MetricCardProps) {
+function MetricCard({ title, value, icon, description, trend, trendUp, color }: MetricCardProps) {
+  const colorMap = {
+    blue: "text-blue-600 bg-blue-50 border-blue-100",
+    emerald: "text-emerald-600 bg-emerald-50 border-emerald-100",
+    violet: "text-violet-600 bg-violet-50 border-violet-100",
+    amber: "text-amber-600 bg-amber-50 border-amber-100",
+  };
+
   return (
-    <div className="creative-card p-5 group">
-      <div className="flex items-start justify-between mb-4">
-        <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 group-hover:border-primary/50 transition-colors">
+    <div className="pro-card group">
+      <div className="flex items-start justify-between">
+        <div className={cn("p-2 rounded-lg border", colorMap[color])}>
           {icon}
         </div>
         <div className={cn(
-          "text-[10px] font-black px-2 py-1 rounded bg-white/5 border border-white/5 uppercase tracking-widest",
-          trendUp ? "text-success" : "text-rose-500"
+          "flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md border",
+          trendUp ? "text-emerald-600 bg-emerald-50 border-emerald-100" : "text-rose-600 bg-rose-50 border-rose-100"
         )}>
+          {trendUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
           {trend}
         </div>
       </div>
       
-      <div>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">
+      <div className="mt-4">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {title}
-        </h3>
-        <div className="text-3xl font-black tracking-tighter italic">
+        </p>
+        <h3 className="text-2xl font-bold tracking-tight mt-1 text-foreground">
           {value}
-        </div>
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2 flex items-center gap-2">
-          <span className="h-1 w-1 rounded-full bg-white/20" /> {description}
+        </h3>
+        <p className="text-[10px] font-medium text-muted-foreground mt-2 flex items-center gap-1.5">
+          <span className="h-1 w-1 rounded-full bg-border" /> {description}
         </p>
       </div>
-
-      {/* Decorative background glow */}
-      <div className="absolute -bottom-6 -right-6 h-20 w-20 bg-primary/10 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
     </div>
   );
 }

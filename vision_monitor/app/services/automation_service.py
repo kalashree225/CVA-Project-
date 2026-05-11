@@ -4,14 +4,6 @@ import random
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 
-<<<<<<< HEAD
-=======
-from app.workflows.engine import workflow_engine
-from app.anomaly.service import anomaly_detection_service
-from app.analytics.service import analytics_service
-from app.services.metrics_service import metrics_service
-
->>>>>>> 1f9e1f428c60a05a90a56f90b558cb17b6e52531
 logger = logging.getLogger(__name__)
 
 class AutomationService:
@@ -49,7 +41,8 @@ class AutomationService:
         self.is_running = False
         for task in self._tasks:
             task.cancel()
-        await asyncio.gather(*self._tasks, return_exceptions=True)
+        if self._tasks:
+            await asyncio.gather(*self._tasks, return_exceptions=True)
         self._tasks = []
         logger.info("Sentinel Automation Service stopped")
 
@@ -57,12 +50,13 @@ class AutomationService:
         """Periodically aggregates metrics from edge nodes."""
         while self.is_running:
             try:
-                logger.info("Executing Neural Aggregation Pipeline...")
                 # Simulate aggregation logic
                 await asyncio.sleep(60) # Run every minute
                 self.stats["total_automations_run"] += 1
                 self.stats["successful_runs"] += 1
                 self.stats["last_run_time"] = datetime.now()
+            except asyncio.CancelledError:
+                break
             except Exception as e:
                 self.stats["failed_runs"] += 1
                 logger.error(f"Neural Aggregation failed: {e}")
@@ -72,11 +66,11 @@ class AutomationService:
         """Periodically scans for anomalies and takes automated actions."""
         while self.is_running:
             try:
-                logger.info("Running Automated Threat Mitigation Audit...")
-                # In a real scenario, this would call anomaly detection and block IPs/tokens
                 await asyncio.sleep(300) # Run every 5 minutes
                 self.stats["total_automations_run"] += 1
                 self.stats["successful_runs"] += 1
+            except asyncio.CancelledError:
+                break
             except Exception as e:
                 logger.error(f"Threat Mitigation Audit failed: {e}")
                 await asyncio.sleep(30)
@@ -85,11 +79,11 @@ class AutomationService:
         """Updates predictive models with latest telemetry."""
         while self.is_running:
             try:
-                logger.info("Updating Predictive Analytics Models...")
-                # Update forecasting logic
                 await asyncio.sleep(3600) # Run every hour
                 self.stats["total_automations_run"] += 1
                 self.stats["successful_runs"] += 1
+            except asyncio.CancelledError:
+                break
             except Exception as e:
                 logger.error(f"Predictive Modeling update failed: {e}")
                 await asyncio.sleep(60)

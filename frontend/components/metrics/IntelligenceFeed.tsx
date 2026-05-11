@@ -1,105 +1,115 @@
 "use client";
 
-import { useMetricsStore } from "@/lib/store/metricsStore";
+import { useEffect, useState } from "react";
+import { Terminal, Shield, Activity, Zap, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Terminal, ShieldAlert, CheckCircle2, ChevronRight, Eye } from "lucide-react";
-import { formatDuration } from "@/lib/utils";
 
 export function IntelligenceFeed() {
-  const { events, setSelectedEvent } = useMetricsStore();
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const response = await fetch(`${baseUrl}/api/v1/intelligence`);
+        const data = await response.json();
+        setEvents(data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch intelligence:", error);
+      }
+    };
+
+    fetchEvents();
+    const interval = setInterval(fetchEvents, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="creative-card p-0 overflow-hidden border-white/5 bg-black/40 h-full flex flex-col">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/5">
-        <div className="flex items-center gap-2">
-          <Terminal className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-black uppercase tracking-widest italic">Live Intelligence <span className="text-primary">Feed</span></h3>
-        </div>
-        <div className="flex items-center gap-4">
-           <div className="hidden sm:flex items-center gap-2">
-              <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest px-2 py-0.5 rounded bg-white/5 border border-white/5">Auto-Scaling: On</span>
-           </div>
-           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Streaming</span>
+    <section className="creative-card p-0 overflow-hidden bg-black/40 border-white/5 h-[500px] flex flex-col shadow-2xl">
+      {/* Feed Header */}
+      <div className="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+            <Terminal className="h-4 w-4 text-primary" />
           </div>
+          <div>
+            <h2 className="text-xs font-black uppercase tracking-widest italic">Intelligence <span className="text-primary">Stream</span></h2>
+            <p className="text-[8px] text-muted-foreground uppercase font-bold tracking-widest mt-0.5">Vector Logs // Sync Active</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+           <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+           <span className="text-[9px] font-black uppercase text-success tracking-widest">Live</span>
         </div>
       </div>
 
-      <div className="flex-1 divide-y divide-white/5 overflow-y-auto custom-scrollbar">
-        {events.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-            <div className="h-10 w-10 rounded-full border-2 border-dashed border-white/10 animate-spin mb-4" />
-            <p className="text-xs font-bold uppercase tracking-widest">Awaiting system packets...</p>
+      {/* Feed Content */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 font-mono scrollbar-thin scrollbar-thumb-white/10">
+        {loading && events.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center opacity-30 gap-4">
+             <Loader2 className="h-6 w-6 animate-spin text-primary" />
+             <p className="italic text-[10px] uppercase font-black tracking-widest">Establishing Neural Uplink...</p>
           </div>
         ) : (
           events.map((event, i) => (
-            <div key={event.run_id + i} className="group flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors relative overflow-hidden">
-              {/* Event Progress Bar */}
-              <div className="absolute bottom-0 left-0 h-0.5 bg-primary/20 w-full" />
-              <div 
-                className={cn("absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-1000", event.status === "failed" && "bg-rose-500")} 
-                style={{ width: `${Math.random() * 100}%` }} 
-              />
-
-              <div className="flex items-center gap-4 relative z-10">
+            <div 
+              key={i} 
+              className={cn(
+                "p-3 rounded-xl border border-transparent hover:border-white/5 hover:bg-white/5 transition-all group animate-in slide-in-from-right-2 duration-300",
+                event.status === "Critical" ? "bg-rose-500/5 border-rose-500/10" : "bg-white/[0.02]"
+              )}
+            >
+              <div className="flex items-start gap-4">
                 <div className={cn(
-                  "h-10 w-10 rounded-xl flex items-center justify-center shadow-inner transition-transform group-hover:scale-110",
-                  event.status === "success" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"
+                  "mt-1 p-1.5 rounded-md border",
+                  event.status === "Critical" ? "bg-rose-500/10 border-rose-500/20 text-rose-500" :
+                  event.type === "SECURITY_PROTOCOL" ? "bg-amber-500/10 border-amber-500/20 text-amber-500" :
+                  "bg-primary/10 border-primary/20 text-primary"
                 )}>
-                  {event.status === "success" ? <CheckCircle2 className="h-5 w-5" /> : <ShieldAlert className="h-5 w-5" />}
+                  {event.status === "Critical" ? <Shield className="h-3 w-3" /> : <Activity className="h-3 w-3" />}
                 </div>
                 
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-black italic tracking-tight">{event.model_name}</span>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity">
+                      {event.timestamp} // {event.type}
+                    </span>
                     <span className={cn(
-                      "text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest border",
-                      event.event_type === "metric_update" ? "bg-accent/10 border-accent/20 text-accent" : "bg-primary/10 border-primary/20 text-primary"
+                      "text-[8px] font-black uppercase px-1.5 py-0.5 rounded border tracking-widest",
+                      event.status === "Critical" ? "border-rose-500/30 text-rose-500" : "border-white/10 text-muted-foreground"
                     )}>
-                      {event.event_type}
+                      {event.status}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-[10px] font-mono text-muted-foreground opacity-50">SHM-{event.run_id.slice(0, 6)}</span>
-                    <span className="text-[10px] font-black text-primary uppercase tracking-tighter italic">
-                      {formatDuration(event.latency_ms)} Latency
-                    </span>
-                    {event.latency_ms > 200 && (
-                      <span className="text-[9px] font-black text-rose-500 uppercase animate-pulse">Auto-Mitigated</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-6 relative z-10">
-                <div className="text-right hidden md:block">
-                  <p className="text-xs font-black italic tracking-tighter">{event.token_count_input + event.token_count_output} TOK</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
-                    ${event.cost_usd.toFixed(4)}
+                  <p className="text-[11px] font-medium leading-relaxed text-foreground/90 group-hover:text-white transition-colors">
+                    {event.message}
                   </p>
                 </div>
-                <button 
-                  onClick={() => setSelectedEvent(event)}
-                  className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center transition-all hover:bg-primary hover:text-primary-foreground hover:border-primary"
-                >
-                  <Eye className="h-4 w-4" />
-                </button>
               </div>
             </div>
           ))
         )}
       </div>
 
-      <div className="px-6 py-4 border-t border-white/5 bg-white/5 flex justify-between items-center">
-        <div className="flex flex-col">
-           <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Global Intelligence Feed</p>
-           <p className="text-[10px] font-black text-primary uppercase italic">Active Node: Sentinel-01</p>
-        </div>
-        <button className="px-3 py-1.5 rounded-lg border border-white/10 text-[10px] font-black text-primary uppercase tracking-widest hover:bg-white/5 transition-colors flex items-center gap-2 group">
-          Intelligence Log <ChevronRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
-        </button>
+      {/* Feed Footer */}
+      <div className="px-6 py-3 border-t border-white/5 bg-white/5 flex items-center justify-between">
+         <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+               <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">Total Events</span>
+               <span className="text-xs font-black italic">{events.length}</span>
+            </div>
+            <div className="h-6 w-[1px] bg-white/10" />
+            <div className="flex flex-col">
+               <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">System Load</span>
+               <span className="text-xs font-black italic text-primary">84%</span>
+            </div>
+         </div>
+         <button className="h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors flex items-center gap-2">
+            Clear Buffer <ChevronRight className="h-3 w-3 opacity-40" />
+         </button>
       </div>
-    </div>
+    </section>
   );
 }
