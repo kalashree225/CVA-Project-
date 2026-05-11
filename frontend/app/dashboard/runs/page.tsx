@@ -111,7 +111,7 @@ export default function RunsPage() {
               className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:ring-1 focus:ring-primary/20 appearance-none"
             >
               <option value="">All Statuses</option>
-              <option value="completed">Completed</option>
+              <option value="success">Completed</option>
               <option value="failed">Failed</option>
             </select>
          </div>
@@ -164,12 +164,12 @@ export default function RunsPage() {
                     <td className="px-6 py-4">
                        <div className={cn(
                          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                         run.status === "completed" ? "bg-emerald-50 border-emerald-100 text-emerald-600" : 
+                         run.status === "success" || run.status === "completed" ? "bg-emerald-50 border-emerald-100 text-emerald-600" : 
                          run.status === "failed" ? "bg-rose-50 border-rose-100 text-rose-600" :
                          "bg-amber-50 border-amber-100 text-amber-600"
                        )}>
-                          {run.status === "completed" ? <CheckCircle2 className="h-2.5 w-2.5" /> : <ShieldAlert className="h-2.5 w-2.5" />}
-                          {run.status}
+                          {run.status === "success" || run.status === "completed" ? <CheckCircle2 className="h-2.5 w-2.5" /> : <ShieldAlert className="h-2.5 w-2.5" />}
+                          {run.status === "success" ? "completed" : run.status}
                        </div>
                     </td>
                     <td className="px-6 py-4 text-right">

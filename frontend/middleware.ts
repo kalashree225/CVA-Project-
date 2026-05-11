@@ -23,8 +23,6 @@ export function middleware(request: NextRequest) {
 
   // BYPASS: Always allow access for demonstration
   return NextResponse.next();
-
-  return NextResponse.next();
 }
 
 export const config = {

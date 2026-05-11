@@ -65,7 +65,7 @@ class InferenceService:
         
         # Create run record
         run = InferenceRun(
-            id=uuid.uuid4(),
+            id=str(uuid.uuid4()),
             model_name=request.model,
             input_type=request.input_type,
             input_text=request.text,
@@ -76,7 +76,7 @@ class InferenceService:
             token_count_output=result["token_count_output"],
             cost_usd=result["cost_usd"],
             trace_id=trace_id,
-            organization_id=organization_id,
+            organization_id=str(organization_id) if organization_id else None,
             status=RunStatus.PENDING
         )
         

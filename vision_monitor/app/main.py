@@ -23,6 +23,7 @@ from app.anomaly.router import router as anomaly_router
 from app.websocket.router import router as websocket_router
 from app.sse.router import router as sse_router
 from app.middleware import AuthMiddleware, RateLimitMiddleware, AuditLogMiddleware
+from app.middleware.prometheus import setup_prometheus
 from app.services.media_service import MediaService
 from app.services.sentinel_engine import SentinelEngine
 from app.services.automation_service import automation_service
@@ -94,6 +95,7 @@ app.add_middleware(
 app.add_middleware(AuditLogMiddleware)
 # app.add_middleware(AuthMiddleware) # Bypass auth for demo
 # app.add_middleware(RateLimitMiddleware)
+setup_prometheus(app)
 
 # Include routers
 app.include_router(inference_router)

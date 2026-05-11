@@ -42,8 +42,9 @@ export default function MetricsPage() {
         hours,
       });
       
-      const chartData = result.map((point: any) => ({
-        timestamp: new Date(point.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      const points = Array.isArray(result) ? result : result.data ?? [];
+      const chartData = points.map((point: any) => ({
+        timestamp: new Date(point.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         value: point.value,
       }));
       

@@ -4,7 +4,7 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from sqlalchemy import select, func, and_
 from app.config import settings
-from app.database import SessionLocal
+from app.database import AsyncSessionLocal
 from app.models.run import InferenceRun
 from typing import Optional, List, Dict
 
@@ -34,6 +34,8 @@ class MetricService:
         hallucination_score: Optional[float]
     ):
         """Write inference metric to InfluxDB."""
+        if not settings.INFLUXDB_URL:
+            return
         try:
             client = MetricService.get_influx_client()
             write_api = client.write_api(write_options=SYNCHRONOUS)
@@ -61,6 +63,8 @@ class MetricService:
         hallucination_score: float
     ):
         """Write hallucination score to InfluxDB."""
+        if not settings.INFLUXDB_URL:
+            return
         try:
             client = MetricService.get_influx_client()
             write_api = client.write_api(write_options=SYNCHRONOUS)
@@ -80,7 +84,7 @@ class MetricService:
         """Get metrics summary for last N hours (Query database if InfluxDB missing)."""
         if not settings.INFLUXDB_URL:
             try:
-                with SessionLocal() as db:
+                async with AsyncSessionLocal() as db:
                     start_time = datetime.utcnow() - timedelta(hours=hours)
                     
                     # Query aggregations
@@ -92,7 +96,8 @@ class MetricService:
                         func.sum(InferenceRun.token_count_input + InferenceRun.token_count_output).label("total_tokens")
                     ).where(InferenceRun.created_at >= start_time)
                     
-                    result = db.execute(stmt).first()
+                    result_proxy = await db.execute(stmt)
+                    result = result_proxy.first()
                     
                     # Query per-model latency
                     model_stmt = select(
@@ -100,13 +105,16 @@ class MetricService:
                         func.avg(InferenceRun.latency_ms)
                     ).where(InferenceRun.created_at >= start_time).group_by(InferenceRun.model_name)
                     
-                    model_results = db.execute(model_stmt).all()
+                    model_results_proxy = await db.execute(model_stmt)
+                    model_results = model_results_proxy.all()
                     avg_latency_per_model = {row[0]: float(row[1]) for row in model_results}
                     
                     return {
                         "avg_latency_per_model": avg_latency_per_model,
                         "total_token_usage": int(result.total_tokens or 0),
                         "total_estimated_cost": float(result.total_cost or 0),
+                        "total_cost_usd": float(result.total_cost or 0),
+                        "avg_latency_ms": float(result.avg_latency or 0),
                         "avg_hallucination_score": float(result.avg_hallucination or 0),
                         "total_requests": int(result.total_requests or 0),
                         "period_hours": hours,
@@ -118,6 +126,9 @@ class MetricService:
                     "avg_latency_per_model": {},
                     "total_token_usage": 0,
                     "total_estimated_cost": 0,
+                    "total_cost_usd": 0,
+                    "avg_latency_ms": 0,
+                    "total_requests": 0,
                     "avg_hallucination_score": 0,
                     "period_hours": hours,
                     "status": "error",
@@ -202,6 +213,12 @@ class MetricService:
                 "avg_latency_per_model": avg_latency_per_model,
                 "total_token_usage": int(total_tokens),
                 "total_estimated_cost": round(total_cost, 6),
+                "total_cost_usd": round(total_cost, 6),
+                "avg_latency_ms": (
+                    sum(avg_latency_per_model.values()) / len(avg_latency_per_model)
+                    if avg_latency_per_model else 0
+                ),
+                "total_requests": 0,
                 "avg_hallucination_score": round(avg_hallucination, 4),
                 "period_hours": hours
             }
@@ -211,6 +228,9 @@ class MetricService:
                 "avg_latency_per_model": {},
                 "total_token_usage": 0,
                 "total_estimated_cost": 0,
+                "total_cost_usd": 0,
+                "avg_latency_ms": 0,
+                "total_requests": 0,
                 "avg_hallucination_score": 0,
                 "period_hours": hours,
                 "error": str(e)
@@ -225,7 +245,7 @@ class MetricService:
         """Get time-series data for a metric (Query database if InfluxDB missing)."""
         if not settings.INFLUXDB_URL:
             try:
-                with SessionLocal() as db:
+                async with AsyncSessionLocal() as db:
                     start_time = datetime.utcnow() - timedelta(hours=hours)
                     
                     # Map metric names to columns
@@ -249,7 +269,8 @@ class MetricService:
                         )
                     ).order_by(InferenceRun.created_at.desc()).limit(100)
                     
-                    results = db.execute(stmt).all()
+                    result_proxy = await db.execute(stmt)
+                    results = result_proxy.all()
                     
                     data = [
                         {"timestamp": row[0].isoformat(), "value": float(row[1])}

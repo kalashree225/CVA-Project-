@@ -7,7 +7,7 @@ from collections import defaultdict
 import statistics
 
 from app.services.metric_service import MetricService
-from app.database import get_db
+from app.database import AsyncSessionLocal
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from app.models.run import InferenceRun
@@ -29,8 +29,7 @@ class AnalyticsService:
         Returns mean, median, std dev, percentiles for latency, tokens, cost, hallucination.
         """
         try:
-            db = get_db()
-            async with db as session:
+            async with AsyncSessionLocal() as session:
                 # Query inference runs
                 query = select(InferenceRun)
                 cutoff = datetime.utcnow() - timedelta(hours=hours)
@@ -246,8 +245,7 @@ class AnalyticsService:
         Compares recent performance to historical baseline.
         """
         try:
-            db = get_db()
-            async with db as session:
+            async with AsyncSessionLocal() as session:
                 # Get recent runs
                 recent_cutoff = datetime.utcnow() - timedelta(hours=hours)
                 baseline_cutoff = datetime.utcnow() - timedelta(hours=hours * 2)
@@ -427,8 +425,7 @@ class AnalyticsService:
     async def get_risk_density() -> List[Dict[str, Any]]:
         """Calculate real risk density based on historical inference anomalies."""
         try:
-            db = get_db()
-            async with db as session:
+            async with AsyncSessionLocal() as session:
                 twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
                 
                 # Query all runs in last 24h
@@ -473,8 +470,7 @@ class AnalyticsService:
     async def get_strategy_optimizer() -> Dict[str, Any]:
         """Compute real model efficiency metrics from the database."""
         try:
-            db = get_db()
-            async with db as session:
+            async with AsyncSessionLocal() as session:
                 # Get last 100 runs for latest efficiency
                 query = select(InferenceRun).order_by(InferenceRun.created_at.desc()).limit(100)
                 result = await session.execute(query)

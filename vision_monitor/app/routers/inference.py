@@ -1,5 +1,6 @@
 import uuid
 import logging
+import redis
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,11 +15,20 @@ from app.services.auth_service import AuthService
 from app.models.user import User
 from app.workers.tasks import evaluate_run_task
 from app.models.run import InputType, RunStatus
+from app.config import settings
 
 router = APIRouter(prefix="/api/v1/inference", tags=["inference"])
 logger = logging.getLogger(__name__)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
+
+
+def redis_available() -> bool:
+    try:
+        client = redis.Redis.from_url(settings.REDIS_URL, socket_connect_timeout=0.1, socket_timeout=0.1)
+        return bool(client.ping())
+    except Exception:
+        return False
 
 
 async def get_optional_current_user(
@@ -38,11 +48,21 @@ async def get_optional_current_user(
     return result.scalar_one_or_none()
 
 
+async def get_current_user(
+    token: Optional[str] = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    user = await get_optional_current_user(token, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    return user
+
+
 @router.post("/run", response_model=InferenceResponse)
 async def run_inference(
     request: InferenceRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Run multimodal inference (text, image, or both).
@@ -75,8 +95,11 @@ async def run_inference(
         hallucination_score=None
     )
     
-    # Trigger async evaluation task
-    evaluate_run_task.delay(str(run.id))
+    # Trigger async evaluation task only when Redis/Celery is actually available.
+    if redis_available():
+        evaluate_run_task.delay(str(run.id))
+    else:
+        logger.info("Redis unavailable; persisted inference run without external Celery dispatch.")
     
     return InferenceResponse(
         run_id=run.id,
