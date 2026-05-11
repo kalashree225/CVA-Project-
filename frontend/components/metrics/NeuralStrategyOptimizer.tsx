@@ -1,16 +1,27 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { Zap, DollarSign, Target, BarChart3, TrendingUp } from "lucide-react";
+import React from "react";
+import { Zap, DollarSign, Target, BarChart3, TrendingUp, Loader2 } from "lucide-react";
+import { useAnalytics } from "@/lib/hooks/useAnalytics";
 
 const MODELS = [
-  { name: "Sentinel-Light (Ollama)", cost: 0.02, latency: 120, accuracy: 82, color: "#10b981" },
-  { name: "Sentinel-Pro (LLaVA)", cost: 0.15, latency: 450, accuracy: 94, color: "#3b82f6" },
-  { name: "Sentinel-Ultra (GPT-4V)", cost: 1.20, latency: 1200, accuracy: 99, color: "#a855f7" },
+  { name: "Sentinel-Light", cost: 0.02, latency: 120, accuracy: 82, color: "#10b981" },
+  { name: "Sentinel-Pro", cost: 0.15, latency: 450, accuracy: 94, color: "#3b82f6" },
+  { name: "Sentinel-Ultra", cost: 1.20, latency: 1200, accuracy: 99, color: "#a855f7" },
 ];
 
 export function NeuralStrategyOptimizer() {
-  const activeModel = MODELS[1]; // LLaVA as default
+  const { strategyData, loading } = useAnalytics();
+
+  if (loading && !strategyData) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <Loader2 className="h-8 w-8 text-primary animate-spin opacity-20" />
+      </div>
+    );
+  }
+
+  const activeModel = strategyData?.avg_latency > 1000 ? MODELS[2] : MODELS[1];
 
   return (
     <div className="space-y-6">
@@ -50,15 +61,15 @@ export function NeuralStrategyOptimizer() {
         </h4>
 
         <div className="space-y-5">
-           <MetricBar label="Latency Offset" value={64} color="bg-primary" suffix="ms" />
-           <MetricBar label="Economic Efficiency" value={88} color="bg-emerald-500" suffix="%" />
-           <MetricBar label="Neural Load Balancer" value={42} color="bg-blue-500" suffix="%" />
+           <MetricBar label="Real Latency" value={Math.min(100, (strategyData?.avg_latency / 20) || 40)} color="bg-primary" suffix="ms" displayValue={strategyData?.avg_latency || 0} />
+           <MetricBar label="Economic Efficiency" value={strategyData?.efficiency_score || 85} color="bg-emerald-500" suffix="%" />
+           <MetricBar label="Real Unit Cost" value={Math.min(100, (strategyData?.avg_cost * 100) || 12)} color="bg-blue-500" suffix="$" displayValue={strategyData?.avg_cost || 0} />
         </div>
 
-        <div className="mt-8 p-4 rounded-xl bg-primary/5 border border-primary/10">
+        <div className="mt-8 p-4 rounded-xl bg-primary/5 border border-primary/10 transition-all hover:bg-primary/10">
           <p className="text-[10px] leading-relaxed italic text-muted-foreground">
-            <strong className="text-primary uppercase not-italic mr-2">Strategy Advice:</strong> 
-            Current throughput suggests switching to <span className="text-foreground font-bold">Sentinel-Light</span> for the next 4 hours to reduce operational costs by <span className="text-emerald-500 font-bold">12.4%</span> without compromising critical security thresholds.
+            <strong className="text-primary uppercase not-italic mr-2">Neural Recommendation:</strong> 
+            <span className="text-foreground font-bold">{strategyData?.recommendation || "Analyzing vectors..."}</span>
           </p>
         </div>
       </div>
@@ -66,16 +77,16 @@ export function NeuralStrategyOptimizer() {
   );
 }
 
-function MetricBar({ label, value, color, suffix }: { label: string, value: number, color: string, suffix: string }) {
+function MetricBar({ label, value, color, suffix, displayValue }: { label: string, value: number, color: string, suffix: string, displayValue?: number }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest opacity-60">
         <span>{label}</span>
-        <span>{value}{suffix}</span>
+        <span>{displayValue !== undefined ? displayValue.toFixed(displayValue < 1 ? 4 : 1) : value}{suffix}</span>
       </div>
       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
         <div 
-          className={`h-full ${color} transition-all duration-1000 ease-out`}
+          className={`h-full ${color} transition-all duration-1000 ease-out shadow-[0_0_8px] shadow-current`}
           style={{ width: `${value}%` }}
         />
       </div>

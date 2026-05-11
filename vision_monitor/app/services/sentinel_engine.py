@@ -132,7 +132,7 @@ class SentinelEngine:
                     token_count_output=tokens_out,
                     cost_usd=cost,
                     status=RunStatus.SUCCESS,
-                    hallucination_score=random.uniform(0.01, 0.08) if not detection_active else random.uniform(0.001, 0.02)
+                    hallucination_score=random.uniform(0.01, 0.45) if detection_active else random.uniform(0.001, 0.08)
                 )
                 db.add(run)
                 

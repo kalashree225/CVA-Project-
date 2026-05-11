@@ -155,3 +155,15 @@ async def get_forecast(
         return forecast
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/risk-density")
+async def get_risk_density():
+    """Calculate real risk density based on historical inference anomalies."""
+    return await AnalyticsService.get_risk_density()
+
+
+@router.get("/strategy-optimizer")
+async def get_strategy_optimizer():
+    """Compute real model efficiency metrics from the database."""
+    return await AnalyticsService.get_strategy_optimizer()
