@@ -10,7 +10,7 @@ from app.config import settings
 import uuid
 
 # Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"], deprecated="auto")
 
 # JWT settings
 SECRET_KEY = settings.VALID_API_KEYS.split(",")[0] if settings.VALID_API_KEYS else "your-secret-key-change-in-production"
@@ -72,7 +72,7 @@ class AuthService:
         """Create a new user."""
         hashed_password = AuthService.get_password_hash(password)
         user = User(
-            id=uuid.uuid4(),
+            id=str(uuid.uuid4()),
             email=email,
             hashed_password=hashed_password,
             full_name=full_name,
@@ -116,7 +116,7 @@ class AuthService:
     ) -> Organization:
         """Create a new organization."""
         org = Organization(
-            id=uuid.uuid4(),
+            id=str(uuid.uuid4()),
             name=name,
             slug=slug,
             description=description,

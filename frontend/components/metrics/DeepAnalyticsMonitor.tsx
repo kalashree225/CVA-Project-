@@ -25,10 +25,11 @@ export function DeepAnalyticsMonitor() {
     const fetchData = async () => {
       try {
         const result = await apiClient.get("/api/v1/metrics/timeseries?metric=latency_ms&model=llava-1.5&hours=24");
-        const formatted = result.map((p: any) => ({
+        const points = Array.isArray(result) ? result : result.data ?? [];
+        const formatted = points.map((p: any) => ({
           time: new Date(p.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           latency: p.value,
-          cost: (p.value * 0.00002) + (Math.random() * 0.001), // Oscillation
+          cost: Number((p.value * 0.00002).toFixed(4)),
           threshold: 1200
         }));
         setData(formatted);

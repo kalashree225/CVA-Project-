@@ -23,6 +23,7 @@ export function LiveMetricsPanel() {
     total_requests: number;
     avg_latency_ms: number;
     total_cost_usd: number;
+    total_estimated_cost?: number;
     avg_hallucination_score: number;
   } | null>(null);
 
@@ -36,7 +37,7 @@ export function LiveMetricsPanel() {
 
   const totalRequests = events.length > 0 ? events.length : (fallbackMetrics?.total_requests || 0);
   const avgLatency = events.length > 0 ? (averageLatencyMs || 0) : (fallbackMetrics?.avg_latency_ms || 0);
-  const totalCost = events.length > 0 ? totalCostUsd : (fallbackMetrics?.total_cost_usd || 0);
+  const totalCost = events.length > 0 ? totalCostUsd : (fallbackMetrics?.total_cost_usd ?? fallbackMetrics?.total_estimated_cost ?? 0);
   
   const liveHallucinationScore = events.length > 0
     ? events.filter(e => e.hallucination_score !== null).reduce((sum, e) => sum + (e.hallucination_score || 0), 0) / 

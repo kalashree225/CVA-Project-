@@ -57,13 +57,14 @@ class SentinelEngine:
         try:
             self.cap = cv2.VideoCapture(settings.HARDWARE_CAMERA_INDEX)
             if not self.cap.isOpened():
-                logger.error(f"Hardware Camera (Index {settings.HARDWARE_CAMERA_INDEX}) not available.")
-                self.is_running = False
-                return
+                logger.warning(
+                    f"Hardware Camera (Index {settings.HARDWARE_CAMERA_INDEX}) not available. "
+                    "Using local telemetry mode."
+                )
+                self.cap = None
         except Exception as e:
-            logger.error(f"Failed to initialize camera hardware: {e}")
-            self.is_running = False
-            return
+            logger.warning(f"Failed to initialize camera hardware: {e}. Using local telemetry mode.")
+            self.cap = None
         
         # Load a simple detector (Haar Cascade for faces as "Real Data")
         cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
@@ -75,15 +76,22 @@ class SentinelEngine:
         
         while self.is_running:
             try:
-                success, frame = self.cap.read()
-                if not success:
-                    time.sleep(1)
-                    continue
-
                 # Process every 2 seconds to avoid CPU spike
                 current_time = time.time()
                 if current_time - self.last_process_time > 2.0:
                     self.last_process_time = current_time
+
+                    if self.cap is None:
+                        self._generate_inference_record(False)
+                        if random_event := self._get_random_telemetry():
+                            self._log_event(*random_event)
+                        time.sleep(0.1)
+                        continue
+
+                    success, frame = self.cap.read()
+                    if not success:
+                        time.sleep(1)
+                        continue
                     
                     # Convert to grayscale for detection
                     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

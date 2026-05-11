@@ -1,9 +1,22 @@
 import pytest
+import pytest_asyncio
 import asyncio
-from httpx import AsyncClient
+import httpx
 from app.main import app
 from app.database import engine, Base, AsyncSessionLocal
 from app.models import *
+
+
+class AsyncClient(httpx.AsyncClient):
+    """Compatibility shim for httpx versions that removed app=."""
+
+    def __init__(self, *args, app=None, **kwargs):
+        if app is not None and "transport" not in kwargs:
+            kwargs["transport"] = httpx.ASGITransport(app=app)
+        super().__init__(*args, **kwargs)
+
+
+httpx.AsyncClient = AsyncClient
 
 
 @pytest.fixture(scope="session")
@@ -14,7 +27,7 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function", autouse=True)
 async def db_session():
     """Create a fresh database session for each test."""
     async with engine.begin() as conn:
@@ -28,7 +41,7 @@ async def db_session():
         await conn.run_sync(Base.metadata.drop_all)
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client():
     """Create an async test client."""
     async with AsyncClient(app=app, base_url="http://test") as ac:

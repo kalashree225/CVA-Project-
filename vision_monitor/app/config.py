@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Optional
 import os
 
 class Settings(BaseSettings):
@@ -33,6 +33,18 @@ class Settings(BaseSettings):
 
     # API Keys
     VALID_API_KEYS: str = "sentinel-api-key"
+
+    # Optional integrations. Empty values keep the project fully local.
+    INFLUXDB_URL: Optional[str] = None
+    INFLUXDB_TOKEN: Optional[str] = None
+    INFLUXDB_ORG: str = "sentinel"
+    INFLUXDB_BUCKET: str = "vision_metrics"
+    PINECONE_API_KEY: Optional[str] = None
+    PINECONE_INDEX: str = "sentinel-runs"
+    PINECONE_DIMENSION: int = 1536
+    LANGFUSE_HOST: Optional[str] = None
+    LANGFUSE_PUBLIC_KEY: Optional[str] = None
+    LANGFUSE_SECRET_KEY: Optional[str] = None
     
     @property
     def valid_api_keys_list(self) -> List[str]:

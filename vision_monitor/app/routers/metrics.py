@@ -22,7 +22,7 @@ async def get_metrics_summary(
 @router.get("/timeseries", response_model=TimeSeriesResponse)
 async def get_timeseries(
     metric: str = Query(..., description="Metric name (e.g., latency_ms, token_count_output)"),
-    model: str = Query(..., description="Model name"),
+    model: str = Query("llava-1.5", description="Model name"),
     hours: int = Query(6, ge=1, le=168, description="Hours of data to retrieve")
 ):
     """
@@ -35,5 +35,6 @@ async def get_timeseries(
         metric=metric,
         model=model,
         hours=hours,
-        data=data
+        data=data,
+        data_points=data
     )

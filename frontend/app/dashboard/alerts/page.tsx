@@ -260,7 +260,7 @@ export default function AlertsPage() {
                           <div>
                              <p className="text-[11px] font-semibold text-foreground">Mitigation: {event.rule_id.slice(0, 8)}</p>
                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[10px] text-muted-foreground font-medium">Value: {event.value.toFixed(2)}</span>
+                                <span className="text-[10px] text-muted-foreground font-medium">Value: {(event.value ?? event.triggered_value ?? 0).toFixed(2)}</span>
                                 <span className="h-0.5 w-0.5 rounded-full bg-border" />
                                 <span className="text-[9px] font-bold uppercase text-emerald-600 tracking-wider">Resolved</span>
                              </div>

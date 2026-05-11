@@ -1,8 +1,10 @@
 from datetime import timedelta
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from typing import Optional
 from app.database import get_db
 from app.services.auth_service import AuthService, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -54,10 +56,14 @@ async def register(
         organization_id = org.id
     else:
         # Create new organization
+        base_slug = request.email.split('@')[0].lower()
+        org_slug = base_slug
+        if await AuthService.get_organization_by_slug(db, org_slug):
+            org_slug = f"{base_slug}-{str(uuid.uuid4())[:8]}"
         org = await AuthService.create_organization(
             db,
-            name=f"{request.email.split('@')[0]}'s Organization",
-            slug=request.email.split('@')[0].lower(),
+            name=f"{org_slug}'s Organization",
+            slug=org_slug,
             description="Default organization"
         )
         organization_id = org.id

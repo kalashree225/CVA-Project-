@@ -1,3 +1,5 @@
+"use client";
+
 import { SystemHealthCore } from "@/components/metrics/SystemHealthCore";
 import { DeepAnalyticsMonitor } from "@/components/metrics/DeepAnalyticsMonitor";
 import { IntelligenceFeed } from "@/components/metrics/IntelligenceFeed";

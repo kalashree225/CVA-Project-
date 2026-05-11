@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/auth";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
@@ -11,20 +10,11 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-  const { isAuthenticated, fetchUser } = useAuthStore();
+  const { fetchUser } = useAuthStore();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login");
-    } else {
-      fetchUser();
-    }
-  }, [isAuthenticated, router, fetchUser]);
-
-  if (!isAuthenticated) {
-    return null;
-  }
+    fetchUser();
+  }, [fetchUser]);
 
   return (
     <div className="min-h-screen flex bg-white relative overflow-hidden">

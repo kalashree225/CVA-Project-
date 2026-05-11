@@ -84,8 +84,8 @@ class AlertService:
         message = f"Alert '{rule.name}' triggered: {rule.metric} = {triggered_value} {rule.operator} {rule.threshold}"
         
         alert_event = AlertEvent(
-            id=uuid.uuid4(),
-            rule_id=rule_id,
+            id=str(uuid.uuid4()),
+            rule_id=str(rule_id),
             triggered_value=triggered_value,
             message=message,
             notified=False
@@ -149,7 +149,7 @@ class AlertService:
     ) -> AlertRule:
         """Create a new alert rule."""
         rule = AlertRule(
-            id=uuid.uuid4(),
+            id=str(uuid.uuid4()),
             name=name,
             metric=metric,
             operator=operator,

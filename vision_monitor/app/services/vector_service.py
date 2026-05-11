@@ -2,19 +2,27 @@ import uuid
 import random
 import logging
 import numpy as np
-from pinecone import Pinecone, ServerlessSpec
 from app.config import settings
 from typing import Optional, List
 
 logger = logging.getLogger(__name__)
+
+try:
+    from pinecone import Pinecone, ServerlessSpec
+    PINECONE_AVAILABLE = True
+except ImportError:
+    PINECONE_AVAILABLE = False
+    logger.warning("Pinecone library not found or broken. Using Neural Simulation Fallback.")
 
 
 class VectorService:
     """Service for Pinecone vector similarity search."""
     
     @staticmethod
-    def get_pinecone_client() -> Pinecone:
+    def get_pinecone_client() -> Optional['Pinecone']:
         """Get Pinecone client."""
+        if not PINECONE_AVAILABLE or not getattr(settings, "PINECONE_API_KEY", None):
+            return None
         return Pinecone(api_key=settings.PINECONE_API_KEY)
     
     @staticmethod
@@ -97,7 +105,7 @@ class VectorService:
         top_k: int = 5
     ) -> List[dict]:
         """Query Pinecone for similar runs (Simulated if Pinecone missing)."""
-        if not settings.PINECONE_API_KEY:
+        if not PINECONE_AVAILABLE or not getattr(settings, "PINECONE_API_KEY", None):
             # Return some mock similar runs
             return [
                 {"run_id": str(uuid.uuid4()), "score": 0.95, "metadata": {"model_name": "gpt-4-vision", "status": "simulated"}},

@@ -17,7 +17,7 @@ export interface AuthTokens {
 // ─── Inference ───────────────────────────────────────────────────────────────
 
 export type InputType = "text" | "image" | "multimodal";
-export type RunStatus = "pending" | "running" | "completed" | "failed";
+export type RunStatus = "pending" | "running" | "completed" | "success" | "failed";
 
 export interface InferenceRun {
   id: string;
@@ -82,10 +82,13 @@ export interface AlertRule {
 export interface AlertEvent {
   id: string;
   rule_id: string;
-  rule_name: string;
-  metric: string;
-  value: number;
-  threshold: number;
+  rule_name?: string;
+  metric?: string;
+  value?: number;
+  triggered_value?: number;
+  threshold?: number;
+  message?: string;
+  notified?: boolean;
   triggered_at: string;
 }
 
