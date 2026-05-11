@@ -6,8 +6,10 @@ import { LiveMetricsPanel } from "@/components/metrics/LiveMetricsPanel";
 import { ResourceUtilizationMap } from "@/components/metrics/ResourceUtilizationMap";
 import { SentinelAnalyticsExplorer } from "@/components/metrics/SentinelAnalyticsExplorer";
 import { AutomationHub } from "@/components/metrics/AutomationHub";
+import { NeuralStrategyOptimizer } from "@/components/metrics/NeuralStrategyOptimizer";
+import { RiskDensityMap } from "@/components/metrics/RiskDensityMap";
 import { Button } from "@/components/ui/Button";
-import { Download, Filter, ChevronRight, Share2, Plus, Loader2, Activity, Shield, Zap, LayoutDashboard } from "lucide-react";
+import { Download, Filter, ChevronRight, Share2, Plus, Loader2, Activity, Shield, Zap, LayoutDashboard, BrainCircuit, BarChart3 } from "lucide-react";
 import { useSentinelOps } from "@/lib/hooks/useSentinelOps";
 import { useAuthStore } from "@/lib/store/auth";
 import { cn } from "@/lib/utils";
@@ -35,7 +37,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <LayoutDashboard className="h-4 w-4 text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Sentinel Command Center // Version 2.0.4</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Sentinel Command Center // Version 2.0.5</span>
           </div>
           <h1 className="text-4xl font-black tracking-tighter uppercase italic">
             Intelligence <span className="animate-gradient-text text-primary">Overview</span>
@@ -65,51 +67,63 @@ export default function DashboardPage() {
 
       {/* Primary Intelligence Cluster */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        {/* Left Span: Health Matrix & Analytics */}
+        {/* Left Span: Strategic Analysis & Decision Tools */}
         <div className="xl:col-span-3 space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <section className="creative-card p-0 overflow-hidden bg-black/40 border-white/5">
+            <section className="creative-card p-0 overflow-hidden bg-black/40 border-white/5 flex flex-col">
               <div className="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-primary" />
-                  <h2 className="text-xs font-black uppercase tracking-widest italic">System <span className="text-primary">Health Matrix</span></h2>
+                  <BrainCircuit className="h-4 w-4 text-primary" />
+                  <h2 className="text-xs font-black uppercase tracking-widest italic">Neural <span className="text-primary">Strategy Optimizer</span></h2>
                 </div>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                   <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                   <span className="text-[8px] font-black uppercase text-emerald-500 tracking-widest">Optimal</span>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
+                   <span className="text-[8px] font-black uppercase text-primary tracking-widest">Decision Support</span>
                 </div>
               </div>
-              <div className="p-6">
-                <SystemHealthCore />
+              <div className="p-6 flex-1">
+                <NeuralStrategyOptimizer />
               </div>
             </section>
 
-            <section className="creative-card p-0 overflow-hidden bg-black/40 border-white/5">
+            <section className="creative-card p-0 overflow-hidden bg-black/40 border-white/5 flex flex-col">
               <div className="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-accent" />
-                  <h2 className="text-xs font-black uppercase tracking-widest italic">Neural <span className="text-accent">Explorer</span></h2>
+                  <BarChart3 className="h-4 w-4 text-accent" />
+                  <h2 className="text-xs font-black uppercase tracking-widest italic">Risk <span className="text-accent">Density Map</span></h2>
                 </div>
-                <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest opacity-40">Live Vector Sync</span>
+                <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest opacity-40">Temporal Distribution</span>
               </div>
-              <div className="p-8 h-full min-h-[300px]">
-                <SentinelAnalyticsExplorer />
+              <div className="p-6 flex-1">
+                <RiskDensityMap />
               </div>
             </section>
           </div>
 
-          <section className="creative-card p-0 overflow-hidden bg-black/40 border-white/5">
-             <div className="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-primary" />
-                <h2 className="text-xs font-black uppercase tracking-widest italic">Sentinel <span className="text-primary">Automation Hub</span></h2>
-              </div>
-              <button className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline underline-offset-4">Configure Protocols</button>
-            </div>
-            <div className="p-8">
-              <AutomationHub />
-            </div>
-          </section>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+             <section className="lg:col-span-1 creative-card p-0 overflow-hidden bg-black/40 border-white/5">
+                <div className="px-6 py-4 border-b border-white/5 bg-white/5">
+                   <h2 className="text-xs font-black uppercase tracking-widest italic flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-primary" /> System <span className="text-primary">Health</span>
+                   </h2>
+                </div>
+                <div className="p-6">
+                   <SystemHealthCore />
+                </div>
+             </section>
+
+             <section className="lg:col-span-2 creative-card p-0 overflow-hidden bg-black/40 border-white/5">
+                <div className="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-primary" />
+                    <h2 className="text-xs font-black uppercase tracking-widest italic">Sentinel <span className="text-primary">Automation Hub</span></h2>
+                  </div>
+                  <button className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline underline-offset-4">Configure Protocols</button>
+                </div>
+                <div className="p-8">
+                  <AutomationHub />
+                </div>
+              </section>
+          </div>
         </div>
 
         {/* Right Span: Live Feed & Quick Ops */}
@@ -130,29 +144,30 @@ export default function DashboardPage() {
           <section className="creative-card bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-2">Platform Alert</h4>
              <p className="text-xs font-medium leading-relaxed italic text-foreground/80">
-                Operational status verified. No critical hardware anomalies detected in the last 24-hour cycle. System is operating at peak efficiency.
+                Operational status verified. No critical hardware anomalies detected. System is operating at peak efficiency with Neural Strategy optimized for <span className="text-primary font-bold">Cost-Efficiency</span>.
              </p>
           </section>
         </div>
       </div>
 
-      {/* Secondary Deep Analytics */}
-      <section className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <h2 className="text-xl font-black tracking-tighter uppercase italic flex items-center gap-2">
-          <Zap className="h-5 w-5 text-primary" /> Deep <span className="text-primary">Neural Intelligence</span>
-        </h2>
-        <DeepAnalyticsMonitor />
-      </section>
+      {/* Secondary Deep Analytics & Topology */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+         <section className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <h2 className="text-xl font-black tracking-tighter uppercase italic flex items-center gap-2">
+               <Zap className="h-5 w-5 text-primary" /> Deep <span className="text-primary">Neural Intelligence</span>
+            </h2>
+            <DeepAnalyticsMonitor />
+         </section>
 
-      {/* Cluster Map Integration */}
-      <section className="space-y-4 pt-10">
-         <h2 className="text-xl font-black tracking-tighter uppercase italic flex items-center gap-2">
-            <LayoutDashboard className="h-5 w-5 text-primary" /> Cluster <span className="text-primary">Topology Overview</span>
-         </h2>
-         <div className="creative-card bg-black/40 border-white/5 p-8">
-            <ResourceUtilizationMap />
-         </div>
-      </section>
+         <section className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <h2 className="text-xl font-black tracking-tighter uppercase italic flex items-center gap-2">
+               <LayoutDashboard className="h-5 w-5 text-primary" /> Cluster <span className="text-primary">Topology Overview</span>
+            </h2>
+            <div className="creative-card bg-black/40 border-white/5 p-8 h-full">
+               <ResourceUtilizationMap />
+            </div>
+         </section>
+      </div>
 
       {/* Global Inspector */}
       <PacketInspector />
